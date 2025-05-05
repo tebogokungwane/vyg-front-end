@@ -1,0 +1,10 @@
+.MDBInput label {
+    transition: top 0.2s ease, color 0.2s ease, -webkit-transform 0.2s ease;
+  }
+  
+  .MDBInput input:focus + label,
+  .MDBInput input:not(:placeholder-shown) + label {
+    top: -20px;
+    transform: scale(0.8);
+  }
+  

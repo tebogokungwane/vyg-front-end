@@ -1,0 +1,27 @@
+/* src/styles/SettingNations.css */
+
+.nation-card {
+    width: 100%;
+  }
+  
+  .nation-card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: nowrap;
+  }
+  
+  .nation-card-header input {
+    flex: 1;
+  }
+  
+  @media (max-width: 768px) {
+    .nation-card {
+      margin-bottom: 16px;
+    }
+  
+    .nation-card-header {
+      flex-wrap: nowrap;
+    }
+  }
+  

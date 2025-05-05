@@ -1,0 +1,52 @@
+.manage-address-wrapper {
+    padding: 20px;
+    box-sizing: border-box;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  
+  .manage-address-form {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    background-color: #ffffff;
+    padding: 16px;
+    border-radius: 8px;
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .manage-address-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  .manage-address-header .ant-input-search {
+    max-width: 300px;
+    flex: 1;
+  }
+  
+  .manage-address-header .ant-btn-primary {
+    white-space: nowrap;
+  }
+  
+  /* Small screen adjustments */
+  @media (max-width: 768px) {
+    .manage-address-form {
+      padding: 12px;
+      border-radius: 0;
+      box-shadow: none;
+    }
+  
+    .ant-table-wrapper {
+      overflow-x: auto;
+    }
+  
+    .ant-table td,
+    .ant-table th {
+      white-space: nowrap;
+    }
+  }
+  

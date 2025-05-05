@@ -1,0 +1,56 @@
+html, body, #root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  .app-container {
+    display: flex;
+    flex-direction: row;
+    min-height: 100vh;
+  }
+  
+  .main-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 100vh;
+  }
+  
+  .main-content > *:last-child {
+    margin-top: auto; /* Push footer to bottom if content is short */
+  }
+
+  @media (max-width: 768px) {
+  .app-container {
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  .main-content {
+    flex: 1;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding-top: 70px;
+    padding-bottom: 80px; /* space for footer */
+  }
+
+  header,
+  footer {
+    position: fixed;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+  }
+
+  header {
+    top: 0;
+  }
+
+  footer {
+    bottom: 0;
+  }
+}
+
+  

@@ -1,0 +1,27 @@
+.base-event-wrapper {
+  width: 100%;
+  min-height: 100vh;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  background-color: #fff;
+}
+
+.base-event-container {
+  width: 100%;
+  max-width: 600px;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .base-event-container {
+    padding: 16px;
+  }
+
+  /* Optional: remove any forced overflow on small screen */
+  .ant-table-wrapper {
+    overflow-x: hidden !important;
+  }
+}

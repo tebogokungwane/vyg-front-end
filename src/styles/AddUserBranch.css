@@ -1,0 +1,28 @@
+/* AddUserBranch.css */
+
+.add-user-wrapper {
+  padding: 20px;
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.add-user-form {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  background-color: #ffffff;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Small screen adjustments */
+@media (max-width: 768px) {
+  .add-user-form {
+    padding: 12px;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}

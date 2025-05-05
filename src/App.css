@@ -1,38 +1,34 @@
-.App {
-  text-align: center;
+/* Make sure to include this file (or these rules) in your project */
+
+/* Container that holds both Sidebar and Main Content */
+.app-container {
+  display: flex;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
+/* Main content shifted to make room for the fixed sidebar */.main-content {
+  flex: 1;
+  margin-left: 250px;
+  padding: 20px;
+  transition: margin-left 0.3s ease;
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  min-height: 100vh;
 }
 
-.App-link {
-  color: #61dafb;
+
+/* When sidebar is closed (mobile or toggled closed) set margin to 0 */
+.app-container .main-content.sidebar-closed {
+  margin-left: 0;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+/* Responsive adjustments for mobile screens */
+@media (max-width: 768px) {
+  .app-container {
+    flex-direction: column;
   }
-  to {
-    transform: rotate(360deg);
+  .main-content {
+    margin-left: 0;
+    padding-top: 70px; /* if you need extra top padding for header on mobile */
   }
 }

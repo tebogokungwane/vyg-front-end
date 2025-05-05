@@ -1,0 +1,95 @@
+/* Header container */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  padding: 10px 20px;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+}
+
+/* Left and right section */
+.header-left,
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
+/* Logo */
+.logo {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+}
+
+/* Hidden by default */
+.hamburger-menu {
+  display: none;
+}
+
+/* Page title */
+.header-center {
+  flex-grow: 1;
+  text-align: center;
+}
+
+.app-name {
+  font-size: 20px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.page-icon {
+  margin-right: 8px;
+  font-size: 20px;
+}
+
+.user-name {
+  font-weight: bold;
+  font-size: 16px;
+  margin-right: 50px;
+}
+
+/* Small screen adjustments */
+@media (max-width: 768px) {
+  .hamburger-menu {
+    display: inline-block;
+  }
+
+  .logo {
+    display: none;
+  }
+
+  .mobile-logo {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    margin-right: 35px;  }
+
+  .user-name {
+    display: none;
+  }
+}
+
+
+.mobile-user-name {
+  padding: 16px;
+  font-weight: bold;
+  text-align: center;
+  border-top: 1px solid #f0f0f0;
+  background-color: #fafafa;
+  font-size: 14px;
+}
+
+.mobile-logo {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  margin-right: 40px;
+}
+

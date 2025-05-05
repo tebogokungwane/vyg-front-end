@@ -1,0 +1,49 @@
+.footer {
+    background-color: #fff;
+    padding: 20px 10px;
+    text-align: center;
+    border-top: 1px solid #eee;
+  }
+  
+  .social-icons {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 10px;
+  }
+  
+  .social-icons a {
+    font-size: 24px;
+    transition: transform 0.2s ease;
+  }
+  
+  .social-icons a:hover {
+    transform: scale(1.2);
+  }
+  
+  /* Icon Colors */
+  .facebook {
+    color: #3b5998; /* Facebook blue */
+  }
+  
+  .twitter {
+    color: #1da1f2; /* Twitter blue */
+  }
+  
+  .instagram {
+    color: #e1306c; /* Instagram pink */
+  }
+  
+  .tiktok {
+    color: #010101; /* TikTok black/neutral */
+  }
+  
+  .youtube {
+    color: #ff0000; /* YouTube red */
+  }
+  
+  .footer-text {
+    color: #666;
+    font-size: 14px;
+  }
+  

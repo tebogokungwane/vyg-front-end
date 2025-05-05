@@ -1,0 +1,55 @@
+import React from "react";
+import { Table } from "antd";
+import { TrophyOutlined } from "@ant-design/icons";
+
+const nationsData = [
+  { nation: "Explosion", totalPoints: 21090 },
+  { nation: "Flawless", totalPoints: 12080 },
+  { nation: "Impact", totalPoints: 26780 },
+  { nation: "Invincible", totalPoints: 18750 },
+  { nation: "Revolution", totalPoints: 20020 },
+  { nation: "Unbeatable", totalPoints: 31840 },
+];
+
+// Sort the data (Highest points first)
+const sortedData = [...nationsData].sort((a, b) => b.totalPoints - a.totalPoints);
+
+const columns = [
+  {
+    title: "Rank",
+    dataIndex: "rank",
+    key: "rank",
+    render: (text, record, index) => (
+      <span style={{ fontWeight: "bold", fontSize: "16px" }}>
+        {index === 0 ? <TrophyOutlined style={{ color: "gold", fontSize: "20px" }} /> : null} {index + 1}
+      </span>
+    ),
+  },
+  {
+    title: "Nation",
+    dataIndex: "nation",
+    key: "nation",
+    render: (text, record, index) => (
+      <span style={{ fontWeight: index === 0 ? "bold" : "normal", color: index === 0 ? "gold" : "black" }}>
+        {text}
+      </span>
+    ),
+  },
+  {
+    title: "Total Points",
+    dataIndex: "totalPoints",
+    key: "totalPoints",
+    sorter: (a, b) => b.totalPoints - a.totalPoints,
+  },
+];
+
+const NationTable = () => {
+  return (
+    <div style={{ padding: "20px", maxWidth: "700px", margin: "0 auto" }}>
+      <h2 style={{ textAlign: "center", fontWeight: "bold" }}>Nation Leaderboard</h2>
+      <Table columns={columns} dataSource={sortedData} pagination={false} rowKey="nation" />
+    </div>
+  );
+};
+
+export default NationTable;
