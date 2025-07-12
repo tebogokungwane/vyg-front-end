@@ -1,3 +1,5 @@
+// src/pages/BarChartPage.js
+
 import React, { useEffect, useState, useContext } from "react";
 import { Bar } from "react-chartjs-2";
 import {
@@ -9,110 +11,131 @@ import {
   Legend,
 } from "chart.js";
 import axios from "axios";
-import { Select, Row, Col, message } from "antd";
+import { Select, Row, Tabs, Radio, Card, message } from "antd";
 import UserContext from "../context/UserContext";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
+
 const { Option } = Select;
 
-// Nation colors (same as in your PieChartPage)
-const NATION_COLORS = {
-  Explosion: "#f5222d",
-  Flawless: "#1890ff",
-  Impact: "#52c41a",
-  Invincible: "#fa8c16",
-  Revolution: "#722ed1",
-  Unbeatable: "#13c2c2",
-  Other: "#eb2f96"
-};
+const COLORS = [
+  "#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF", "#FF9F40",
+  "#8AC24A", "#EA5F89", "#00BFFF", "#FFD700", "#32CD32", "#BA55D3",
+];
 
 const BarChartPage = () => {
   const { user } = useContext(UserContext);
+  const [chartData, setChartData] = useState(null);
   const [data, setData] = useState([]);
   const [selectedYear, setSelectedYear] = useState(null);
-  const [chartData, setChartData] = useState(null);
+  const [selectedMonth, setSelectedMonth] = useState(null);
   const [years, setYears] = useState([]);
-  const [displayMode, setDisplayMode] = useState("points"); // "points" or "people"
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [months, setMonths] = useState([]);
+  const [timeView, setTimeView] = useState("yearly");
+  const [metric, setMetric] = useState("points");
 
-  // Update mobile state on resize
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  // Fetch performance data
-  useEffect(() => {
-    const fetchPoints = async () => {
+    const fetchData = async () => {
       if (!user?.address?.id) {
         message.error("User address ID not found.");
         return;
       }
+
       try {
         const res = await axios.get(
-          `http://localhost:2025/api/points/summary/address/${user.address.id}`
+          `http://localhost:2025/api/nation-stats/address/${user.address.id}`
         );
         setData(res.data);
 
-        const uniqueYears = [...new Set(res.data.map((item) => item.year))];
+        const uniqueYears = [...new Set(res.data.map((item) => item.year))]
+          .filter((year) => year !== undefined && year !== null)
+          .sort((a, b) => b - a);
+
+        const uniqueMonths = [...new Set(res.data.map((item) => item.month))]
+          .filter((month) => month !== undefined && month !== null)
+          .sort((a, b) => b - a);
+
         setYears(uniqueYears);
-        if (uniqueYears.length > 0) {
-          setSelectedYear(uniqueYears[0]);
-        }
+        setMonths(uniqueMonths);
+
+        if (uniqueYears.length > 0) setSelectedYear(uniqueYears[0]);
+        if (uniqueMonths.length > 0) setSelectedMonth(uniqueMonths[0]);
       } catch (err) {
-        console.error("Error loading bar chart data:", err);
-        message.error("Failed to fetch bar chart data.");
+        console.error("Error fetching nation data:", err);
+        message.error("Failed to load bar chart data.");
       }
     };
-    fetchPoints();
+
+    fetchData();
   }, [user]);
 
-  // Process data for the chart
   useEffect(() => {
-    if (!selectedYear || !displayMode) return;
+    if (!data.length) return;
 
-    const filtered = data.filter((d) => d.year === selectedYear);
+    let filtered = [...data];
+    if (timeView === "yearly" && selectedYear) {
+      filtered = filtered.filter((item) => item.year === selectedYear);
+    } else if (timeView === "monthly" && selectedMonth) {
+      filtered = filtered.filter((item) => item.month === selectedMonth);
+    }
+
     const nationData = {};
-
     filtered.forEach((item) => {
-      const nation = item.nation.nation;
+      const nation = item.nation?.nation || item.nation; // handle both object and string
+      if (!nation) return;
+
       if (!nationData[nation]) {
         nationData[nation] = { points: 0, people: 0 };
       }
-      nationData[nation].points += item.totalPointsEarnedPerWeek;
-      nationData[nation].people += item.numberOfPeople;
+
+      nationData[nation].points += item.totalPoints || 0;
+      nationData[nation].people += item.totalMembers || 0;
     });
 
     const labels = Object.keys(nationData);
-    const values = labels.map((nation) => nationData[nation][displayMode]);
-    const backgroundColors = labels.map(
-      (nation) => NATION_COLORS[nation] || NATION_COLORS.Other
-    );
+    const values = labels.map((nation) => nationData[nation][metric]);
+
+    const backgroundColors = labels.map((_, i) => COLORS[i % COLORS.length]);
 
     setChartData({
       labels,
       datasets: [
         {
-          label: displayMode === "points" ? "Total Points" : "Total People",
+          label: metric === "points" ? "Total Points" : "Total Members",
           data: values,
           backgroundColor: backgroundColors,
+          borderColor: backgroundColors,
+          borderWidth: 1,
+          borderRadius: 4,
         },
       ],
     });
-  }, [selectedYear, displayMode, data]);
+  }, [data, selectedYear, selectedMonth, timeView, metric]);
 
-  // Define chart options – these are responsive
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { position: "top" },
+      legend: {
+        position: "bottom",
+        labels: {
+          font: { size: 14 },
+          usePointStyle: true,
+          padding: 20,
+        },
+      },
       tooltip: {
         callbacks: {
-          label: (context) =>
-            `${context.dataset.label}: ${context.formattedValue}`,
+          label: (context) => {
+            return `${context.dataset.label}: ${context.parsed.y}`;
+          },
         },
+      },
+      title: {
+        display: true,
+        text: `${timeView === "yearly" ? "Yearly" : "Monthly"} Performance (${metric === "points" ? "Points" : "Members"})`,
+        font: { size: 18, weight: "bold" },
+        padding: { top: 10, bottom: 20 },
       },
     },
     scales: {
@@ -120,56 +143,123 @@ const BarChartPage = () => {
         beginAtZero: true,
         title: {
           display: true,
-          text: displayMode === "points" ? "Points" : "People",
+          text: metric === "points" ? "Points Earned" : "Number of Members",
+          font: { size: 14, weight: "bold" },
         },
+        grid: { color: "rgba(0,0,0,0.05)" },
+      },
+      x: {
+        grid: { display: false },
       },
     },
   };
 
-  // Determine container styles based on screen size
-  const containerStyle = isMobile
-    ? { width: "90%", height: "300px", margin: "0 auto" }
-    : { width: "80%", maxWidth: "800px", height: "500px", margin: "0 auto" };
-
   return (
-    <div style={{ padding: "30px", textAlign: "center" }}>
-      <h2 style={{ marginBottom: "20px" }}>📊 Nation Performance Bar Chart</h2>
+    <div style={{ padding: "24px 12px", maxWidth: "100vw" }}>
+      <h2 style={{
+        textAlign: "center",
+        marginBottom: "24px",
+        fontSize: "24px",
+        fontWeight: "600",
+      }}>
+        📋 Nation Performance Comparison
+      </h2>
 
-      <Row gutter={16} justify="center" style={{ marginBottom: 20 }}>
-        <Col>
+      <Row justify="center" style={{ marginBottom: "24px" }}>
+        <Radio.Group
+          value={metric}
+          onChange={(e) => setMetric(e.target.value)}
+          buttonStyle="solid"
+          size="large"
+        >
+          <Radio.Button value="points">Points</Radio.Button>
+          <Radio.Button value="people">Members</Radio.Button>
+        </Radio.Group>
+      </Row>
+
+      <Tabs
+        activeKey={timeView}
+        onChange={setTimeView}
+        centered
+        size="large"
+        items={[
+          { key: "yearly", label: "Yearly View" },
+          { key: "monthly", label: "Monthly View" },
+        ]}
+        style={{ marginBottom: "24px" }}
+      />
+
+      <Row justify="center" style={{ marginBottom: "24px" }}>
+        {timeView === "yearly" ? (
           <Select
-            placeholder="Select Year"
             value={selectedYear}
             onChange={setSelectedYear}
-            style={{ width: 150 }}
+            style={{ width: 200 }}
+            size="large"
           >
-            {years.map((y) => (
-              <Option key={y} value={y}>
-                {y}
+            {years.map((year) => (
+              <Option key={`year-${year}`} value={year}>
+                {year}
               </Option>
             ))}
           </Select>
-        </Col>
-        <Col>
+        ) : (
           <Select
-            placeholder="Display"
-            value={displayMode}
-            onChange={setDisplayMode}
+            value={selectedMonth}
+            onChange={setSelectedMonth}
             style={{ width: 200 }}
+            size="large"
           >
-            <Option value="points">Show Total Points</Option>
-            <Option value="people">Show Number of People</Option>
+            {months.map((month) => (
+              <Option key={`month-${month}`} value={month}>
+                Month {month}
+              </Option>
+            ))}
           </Select>
-        </Col>
+        )}
       </Row>
 
-      {chartData ? (
-        <div style={containerStyle}>
-          <Bar data={chartData} options={chartOptions} />
-        </div>
-      ) : (
-        <p style={{ color: "gray" }}>No data to display</p>
-      )}
+      <Card
+        style={{
+          height: "70vh",
+          minHeight: "600px",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+          borderRadius: "12px",
+        }}
+        styles={{
+          body: {
+            padding: "24px",
+            height: "100%",
+            display: "flex",
+            flexDirection: "column",
+          },
+        }}
+        variant="outlined"
+      >
+        {chartData ? (
+          <div style={{
+            flex: 1,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100%",
+            width: "100%",
+          }}>
+            <Bar data={chartData} options={chartOptions} />
+          </div>
+        ) : (
+          <div style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100%",
+            color: "gray",
+            fontSize: "16px",
+          }}>
+            {data.length ? "Loading chart data..." : "No data available"}
+          </div>
+        )}
+      </Card>
     </div>
   );
 };

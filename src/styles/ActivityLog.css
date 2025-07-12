@@ -1,0 +1,27 @@
+/* ActivityLog.css */
+.activity-log-container {
+    padding: 24px;
+  }
+  
+  .activity-log-card {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .activity-filters {
+    margin-bottom: 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  
+  @media (max-width: 768px) {
+    .activity-filters {
+      flex-direction: column;
+    }
+    
+    .activity-filters > * {
+      width: 100% !important;
+      margin-right: 0 !important;
+      margin-bottom: 8px;
+    }
+  }

@@ -1,27 +1,88 @@
-/* src/styles/SettingNations.css */
-
+/* Nation Card Styling */
 .nation-card {
-    width: 100%;
+  width: 100%;
+}
+
+/* Header with input and Save button */
+.nation-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.nation-card-header input {
+  flex: 1;
+}
+
+/* Responsive adjustments for small screens */
+@media (max-width: 768px) {
+  .nation-card {
+    margin-bottom: 16px;
   }
-  
+
   .nation-card-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
     flex-wrap: nowrap;
   }
-  
-  .nation-card-header input {
-    flex: 1;
+
+  /* Floating action button (FAB) for small screens */
+  .fab-button {
+    display: flex;
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 1000;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
   }
-  
-  @media (max-width: 768px) {
-    .nation-card {
-      margin-bottom: 16px;
-    }
-  
-    .nation-card-header {
-      flex-wrap: nowrap;
-    }
+}
+
+/* Hide the FAB on larger screens */
+@media (min-width: 769px) {
+  .fab-button {
+    display: none;
   }
-  
+}
+
+
+/* Wrapper to align buttons */
+.create-button-wrapper {
+  position: relative;
+  margin-bottom: 24px;
+  text-align: right;
+}
+
+/* Large screen button: show only on large screens */
+.create-button-large {
+  display: none;
+}
+
+@media (min-width: 769px) {
+  .create-button-large {
+    display: inline-block;
+  }
+
+  .fab-button {
+    display: none;
+  }
+}
+
+/* Small screen FAB: show only on small screens */
+.fab-button {
+  display: flex;
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1000;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+}
+

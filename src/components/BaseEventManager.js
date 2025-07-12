@@ -1,10 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { Table, Button, Modal, Form, Input, InputNumber, Space, message, Popconfirm } from "antd";
+import {
+  Table,
+  Button,
+  Modal,
+  Form,
+  Input,
+  InputNumber,
+  Space,
+  message,
+  Popconfirm,
+  Alert,
+} from "antd";
 import axios from "axios";
 import "../styles/BaseEventManager.css";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
-
-
 
 const BaseEventManager = () => {
   const [events, setEvents] = useState([]);
@@ -13,6 +22,19 @@ const BaseEventManager = () => {
   const [editingEvent, setEditingEvent] = useState(null);
   const [form] = Form.useForm();
 
+  const [successMessage, setSuccessMessage] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
+
+  const showSuccess = (msg) => {
+    setSuccessMessage(msg);
+    setTimeout(() => setSuccessMessage(null), 3000);
+  };
+
+  const showError = (msg) => {
+    setErrorMessage(msg);
+    setTimeout(() => setErrorMessage(null), 3000);
+  };
+
   const fetchEvents = async () => {
     setLoading(true);
     try {
@@ -20,7 +42,7 @@ const BaseEventManager = () => {
       setEvents(res.data);
     } catch (error) {
       console.error("Error fetching events", error);
-      message.error("Failed to fetch events");
+      showError("Failed to fetch events");
     } finally {
       setLoading(false);
     }
@@ -32,54 +54,61 @@ const BaseEventManager = () => {
 
   const openModal = (record = null) => {
     setEditingEvent(record);
-    form.setFieldsValue(record || { name: "", defaultPoints: 0 });
+    if (record) {
+      // map record.name → eventName for the form
+      form.setFieldsValue({
+        eventName: record.name,
+        defaultPoints: record.defaultPoints,
+      });
+    } else {
+      form.setFieldsValue({ eventName: "", defaultPoints: 0 });
+    }
     setModalVisible(true);
   };
+  
 
   const handleDelete = async (id) => {
     try {
+      
       await axios.delete(`http://localhost:2025/api/base-events/${id}`);
-      message.success("Event deleted successfully");
+      showSuccess("Event deleted successfully");
       fetchEvents();
     } catch (error) {
       console.error("Delete error:", error);
-      message.error("Failed to delete event");
+      showError("Failed to delete event");
     }
   };
 
   const handleFinish = async (values) => {
     try {
       if (editingEvent) {
-        await axios.put(`http://localhost:2025/api/base-events/update/${editingEvent.id}`, values);
-        message.success("Event updated");
+        await axios.put(
+          `http://localhost:2025/api/base-events/update/${editingEvent.id}`,
+          values
+        );
+        showSuccess("Event updated successfully");
       } else {
         await axios.post("http://localhost:2025/api/base-events/create", values);
-        message.success("Event created");
+        showSuccess("Event created successfully");
       }
       setModalVisible(false);
       form.resetFields();
       fetchEvents();
     } catch (error) {
       console.error("Save error:", error);
-      message.error("Failed to save event");
+      showError("Failed to save event");
     }
   };
 
   const columns = [
-    // { title: "ID", dataIndex: "id", key: "id" },
     { title: "Event Name", dataIndex: "name", key: "name" },
     { title: "Default Points", dataIndex: "defaultPoints", key: "defaultPoints", align: "center" },
-    
     {
       title: "Actions",
       key: "actions",
       render: (_, record) => (
         <Space>
-          <Button
-            onClick={() => openModal(record)}
-            icon={<EditOutlined />}
-            type="text"
-          />
+          <Button onClick={() => openModal(record)} icon={<EditOutlined />} type="text" />
           <Popconfirm
             title="Are you sure you want to delete this event?"
             onConfirm={() => handleDelete(record.id)}
@@ -91,7 +120,6 @@ const BaseEventManager = () => {
         </Space>
       ),
     },
-    
   ];
 
   return (
@@ -101,18 +129,35 @@ const BaseEventManager = () => {
           ➕ Add New Event
         </Button>
 
+        {successMessage && (
+          <Alert
+            message={successMessage}
+            type="success"
+            showIcon
+            closable
+            style={{ marginBottom: 16 }}
+          />
+        )}
+
+        {errorMessage && (
+          <Alert
+            message={errorMessage}
+            type="error"
+            showIcon
+            closable
+            style={{ marginBottom: 16 }}
+          />
+        )}
+
         <Table
           dataSource={events}
           columns={columns}
           rowKey="id"
           loading={loading}
           bordered
-          pagination={{ pageSize: 8 }} // or 10
-          // Removed scroll={{ x: '100%' }}
+          pagination={{ pageSize: 8 }}
           style={{ width: "100%" }}
         />
-
-
 
         <Modal
           title={editingEvent ? "Edit Base Event" : "Create Base Event"}
@@ -143,7 +188,6 @@ const BaseEventManager = () => {
       </div>
     </div>
   );
-
 };
 
 export default BaseEventManager;

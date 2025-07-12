@@ -12,7 +12,6 @@ import {
 import axios from "axios";
 import UserContext from "../context/UserContext";
 
-
 const { Option } = Select;
 const { TextArea } = Input;
 
@@ -22,7 +21,6 @@ const AdjustNationPoints = () => {
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {
@@ -62,11 +60,9 @@ const AdjustNationPoints = () => {
 
     setLoading(true);
     try {
-      await axios.post("http://localhost:2025/api/points/adjust", payload);
-      setShowSuccessAlert(true); // ✅ Show alert
+      await axios.post("http://localhost:2025/api/manual-adjustment/request", payload);
+      setShowSuccessAlert(true);
       form.resetFields();
-
-      // Optional: auto-hide the alert after 3 seconds
       setTimeout(() => setShowSuccessAlert(false), 3000);
     } catch (error) {
       console.error("Error adjusting points:", error);
@@ -76,10 +72,7 @@ const AdjustNationPoints = () => {
     }
   };
 
-
   return (
-
-
     <div
       style={{
         padding: isMobile ? "0px" : "80px",
@@ -87,7 +80,6 @@ const AdjustNationPoints = () => {
         minHeight: "100vh",
       }}
     >
-
       {showSuccessAlert && (
         <Alert
           message="✅ Points adjusted successfully!"
@@ -147,7 +139,12 @@ const AdjustNationPoints = () => {
 
           <Form.Item>
             <Row justify="center">
-              <Button type="primary" htmlType="submit" loading={loading}>
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={loading}
+                disabled={loading}
+              >
                 Submit Adjustment
               </Button>
             </Row>

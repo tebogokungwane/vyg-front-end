@@ -1,16 +1,24 @@
-// src/components/ForgotPassword.js
 import React, { useState } from "react";
 import { Form, Input, Button, message } from "antd";
-import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import Logo from '../images/vyg.jpg'; // Make sure this path is correct
 
 const ForgotPassword = () => {
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const onFinish = (values) => {
     setLoading(true);
-    axios
-      .post("http://localhost:2025/api/auth/forgot-password", {
-        email: values.email,
+    fetch("http://localhost:2025/api/auth/forgot-password", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email: values.email }),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed");
+        return res.json();
       })
       .then(() => {
         message.success("Reset link sent to your email");
@@ -22,8 +30,23 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div style={{ maxWidth: 400, margin: "100px auto" }}>
+    <div style={{ maxWidth: 400, margin: "100px auto", padding: 20, textAlign: "center" }}>
+      {/* ✅ Logo */}
+      <div style={{ marginBottom: 24 }}>
+        <img
+          src={Logo}
+          alt="VYG Logo"
+          style={{
+            width: 80,
+            height: 80,
+            objectFit: "contain",
+            borderRadius: "50%",
+          }}
+        />
+      </div>
+
       <h2>Forgot Password</h2>
+
       <Form layout="vertical" onFinish={onFinish}>
         <Form.Item
           name="email"
@@ -38,6 +61,10 @@ const ForgotPassword = () => {
           </Button>
         </Form.Item>
       </Form>
+
+      <Button type="link" onClick={() => navigate("/")}>
+        ← Back to Login
+      </Button>
     </div>
   );
 };

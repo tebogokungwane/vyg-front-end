@@ -1,0 +1,21 @@
+.pie-chart-page {
+    padding: 60px 20px;
+    text-align: center;
+  }
+  
+  .pie-chart-page h2 {
+    margin-bottom: 40px;
+  }
+  
+  .chart-container {
+    width: 60%;
+    max-width: 600px;
+    height: 400px;
+    margin: 0 auto;
+  }
+  
+  .chart-container.mobile {
+    width: 95%;
+    height: 500px;
+  }
+  

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Button, Form, Input, Select, message } from 'antd';
+import { Button, Form, Input, Select, message, Alert } from 'antd';
 import axios from 'axios';
 import UserContext from '../context/UserContext';
 
@@ -7,10 +7,16 @@ const { Option } = Select;
 
 const AddMentor = () => {
   const [form] = Form.useForm();
-  const [nations, setNations] = useState([]);
   const [role, setRole] = useState("MENTOR");
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768); // ✅ Track screen size
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const { user } = useContext(UserContext);
+  const [alertInfo, setAlertInfo] = useState(null);
+  const [nations, setNations] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // 🔧 You can change these to control height easily
+  const mobileHeight = "100vh";       // height for mobile
+  const desktopHeight = "90vh";       // height for desktop
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -29,6 +35,7 @@ const AddMentor = () => {
   }, []);
 
   const onFinish = async (values) => {
+    setLoading(true);
     try {
       const payload = {
         name: values.firstName,
@@ -37,162 +44,155 @@ const AddMentor = () => {
         gender: values.gender.toUpperCase(),
         cellNumber: values.phone,
         residentialAddress: role !== "PR" ? values.residentialAddress : null,
-        nation: role !== "PR"
-          ? { id: values.nationId, nation: values.nationName?.toUpperCase() }
-          : null,
         addressId: role !== "PR" ? user?.address?.id : null,
         role: values.role,
+        nation: role === "MENTOR"
+          ? { id: values.nationId, nation: values.nationName?.toUpperCase() }
+          : null,
         password: "VYG@123",
         isActive: true,
         createBy: `${user?.name} ${user?.surname}`,
       };
 
       const response = await axios.post("http://localhost:2025/api/member/register", payload);
-      message.success(`🎉 ${response.data.name} ${response.data.surname} registered successfully!`);
+
+      setAlertInfo({
+        text: `🎉 ${response.data.name} ${response.data.surname} has been successfully registered!`,
+        type: "success",
+      });
+
       form.resetFields();
     } catch (error) {
       console.error("❌ Failed to create member:", error);
-      message.error("Failed to register member. Please try again.");
+      setAlertInfo({
+        text: "⚠️ Something went wrong! Unable to register the member. Please try again.",
+        type: "error",
+      });
+    } finally {
+      setLoading(false);
+      setTimeout(() => setAlertInfo(null), 5000);
     }
   };
-
-  const prefixSelector = (
-    <Form.Item name="prefix" noStyle>
-      <Select style={{ width: 70 }} defaultValue="27">
-        <Option value="27">+27</Option>
-        <Option value="1">+1</Option>
-        <Option value="44">+44</Option>
-      </Select>
-    </Form.Item>
-  );
 
   return (
     <div
       style={{
         display: "flex",
         justifyContent: "center",
-        padding: isMobile ? "10px" : "50px",
-        height: "100vh",
+        alignItems: isMobile ? "flex-start" : "center",
+        padding: isMobile ? "20px 10px" : "40px",
+        minHeight: isMobile ? mobileHeight : desktopHeight,
         boxSizing: "border-box",
+        // backgroundColor: "#f5f5f5",
       }}
     >
       <div
         style={{
-          width: isMobile ? "100%" : "500px",
-          margin: "auto",
+          width: isMobile ? "100%" : "450px",
           backgroundColor: "#ffffff",
-          borderRadius: isMobile ? 0 : "10px",
-          boxShadow: isMobile ? "none" : "0px 4px 10px rgba(0, 0, 0, 0.1)",
-          padding: "20px",
-          boxSizing: "border-box",
-          overflowY: "auto",
+          padding: isMobile ? "20px" : "40px",
+          boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+          borderRadius: "8px",
         }}
       >
-        <Form
-          form={form}
-          name="addMemberForm"
-          layout="vertical"
-          onFinish={onFinish}
-          autoComplete="off"
-        >
-          <Form.Item
-            name="firstName"
-            label="First Name"
-            rules={[{ required: true, message: "Please enter the first name" }]}
-          >
+        <Form form={form} name="addMentorForm" layout="vertical" onFinish={onFinish}>
+          <Form.Item name="firstName" label="First Name" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
 
-          <Form.Item
-            name="lastName"
-            label="Last Name"
-            rules={[{ required: true, message: "Please enter the last name" }]}
-          >
+          <Form.Item name="lastName" label="Last Name" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
 
-          <Form.Item
-            name="email"
-            label="Email"
-            rules={[{ type: "email", message: "Invalid email" }]}
-          >
+          <Form.Item name="email" label="Email" rules={[{ type: "email" }]}>
             <Input />
           </Form.Item>
 
           <Form.Item
             name="phone"
             label="Phone Number"
-            rules={[{ required: true, message: "Please enter the phone number" }]}
+            rules={[
+              { required: true },
+              {
+                pattern: /^0[6-8][0-9]{8}$/,
+                message: "Enter a valid SA number (e.g. 0821234567)",
+              },
+            ]}
           >
-            <Input addonBefore={prefixSelector} style={{ width: "100%" }} />
+            <Input maxLength={10} placeholder="e.g. 0821234567" />
           </Form.Item>
 
-          <Form.Item
-            name="gender"
-            label="Gender"
-            rules={[{ required: true, message: "Please select a gender" }]}
-          >
+          <Form.Item name="gender" label="Gender" rules={[{ required: true }]}>
             <Select placeholder="Select gender">
               <Option value="male">Male</Option>
               <Option value="female">Female</Option>
             </Select>
           </Form.Item>
 
-          <Form.Item
-            name="role"
-            label="Role"
-            rules={[{ required: true, message: "Please select a role" }]}
-          >
+          <Form.Item name="role" label="Role" rules={[{ required: true }]}>
             <Select placeholder="Select role" onChange={(value) => setRole(value)}>
+              <Option value="MEMBER">MEMBER</Option>
               <Option value="MENTOR">MENTOR</Option>
               <Option value="SECRETARY">SECRETARY</Option>
               <Option value="PR">PR</Option>
             </Select>
           </Form.Item>
 
+          {role === "MENTOR" && (
+            <Form.Item
+              name="nationId"
+              label="Nation"
+              rules={[{ required: true }]}
+            >
+              <Select
+                placeholder="Select the nation"
+                onChange={(value) => {
+                  const selected = nations.find(n => n.id === value);
+                  form.setFieldsValue({
+                    nationId: value,
+                    nationName: selected?.nation,
+                  });
+                }}
+              >
+                {nations.map((n) => (
+                  <Option key={n.id} value={n.id}>
+                    {n.nation}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+          )}
+
           {role !== "PR" && (
-            <>
-              <Form.Item
-                name="residentialAddress"
-                label="Residential Address"
-                rules={[{ required: true, message: "Please enter the residential address" }]}
-              >
-                <Input.TextArea rows={3} />
-              </Form.Item>
+            <Form.Item
+              name="residentialAddress"
+              label="Residential Address"
+              rules={[{ required: true }]}
+            >
+              <Input.TextArea rows={3} />
+            </Form.Item>
+          )}
 
-              <Form.Item
-                name="nation"
-                label="Nation"
-                rules={[{ required: true, message: "Please select the nation" }]}
-              >
-                <Select
-                  placeholder="Select the nation"
-                  onChange={(value, option) => {
-                    form.setFieldsValue({
-                      nationId: option.key,
-                      nationName: option.label,
-                    });
-                  }}
-                >
-                  {nations.map((n) => (
-                    <Option key={n.id} value={n.nation} label={n.nation}>
-                      {n.nation}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-
-              <Form.Item name="nationId" noStyle hidden>
-                <Input />
-              </Form.Item>
-              <Form.Item name="nationName" noStyle hidden>
-                <Input />
-              </Form.Item>
-            </>
+          {alertInfo && (
+            <Form.Item>
+              <Alert
+                message={alertInfo.text}
+                type={alertInfo.type}
+                showIcon
+                closable
+                onClose={() => setAlertInfo(null)}
+              />
+            </Form.Item>
           )}
 
           <Form.Item>
-            <Button type="primary" htmlType="submit" style={{ width: "100%" }}>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={loading}
+              disabled={loading}
+              style={{ width: "100%" }}
+            >
               Submit
             </Button>
           </Form.Item>

@@ -5,25 +5,46 @@ import {
   Col,
   Statistic,
   Spin,
+  Alert,
+  Typography
 } from "antd";
 import {
   TeamOutlined,
   UserOutlined,
   UsergroupAddOutlined,
   DeploymentUnitOutlined,
-  TrophyOutlined,
-  CrownOutlined,
+  TrophyOutlined
 } from "@ant-design/icons";
-import axios from "axios";
+import axios from "../components/axios";
 import UserContext from "../context/UserContext";
 import NationPerformanceOverview from "../components/NationPerformanceOverview";
 
+const { Title, Text } = Typography;
+
 const Dashboard = () => {
   const { user } = useContext(UserContext);
-
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768); // ✅ moved to top
+  const [error, setError] = useState(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  // Enhanced debug logging for user context
+  useEffect(() => {
+    console.log("User context details:", {
+      name: user?.name,
+      surname: user?.surname,
+      email: user?.email,
+      id: user?.id,
+      addressId: user?.address?.id,
+      role: user?.role || 'Not specified', // This will show if role is missing
+      allProperties: user ? Object.keys(user) : 'User not loaded'
+    });
+    
+    // Additional check for role existence
+    if (user && !user.role) {
+      console.warn("Warning: User role is not defined in user context");
+    }
+  }, [user]);
 
   // Detect screen size changes
   useEffect(() => {
@@ -32,35 +53,49 @@ const Dashboard = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Fetch stats
+  // Fetch stats - now properly handles undefined addressId
   useEffect(() => {
     const fetchStats = async () => {
-      if (!user?.address?.id) {
-        setLoading(false);
-        return;
-      }
-
+      setLoading(true);
+      setError(null);
+      
       try {
-        const response = await axios.get(
-          `http://localhost:2025/api/dashboard/summary?addressId=${user.address.id}`
-        );
+        // Use hardcoded addressId if user.address.id is not available
+        const addressId = user?.address?.id;
+        console.log("Using addressId:", addressId);
+
+        const response = await axios.get(`/api/dashboard/summary?addressId=${addressId}`);
+        
+        console.log("API Response Data:", response.data);
         setStats(response.data);
       } catch (err) {
-        console.error("❌ Failed to load stats", err);
+        console.error("API Error Details:", {
+          message: err.message,
+          response: err.response?.data,
+          status: err.response?.status
+        });
+        setError(err.response?.data?.message || err.message || "Failed to load dashboard data");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchStats();
+    // Only fetch if user context is loaded
+    if (user !== null) {
+      fetchStats();
+    }
   }, [user]);
 
   if (loading) {
     return (
       <div style={{ textAlign: "center", padding: "100px" }}>
-        <Spin size="large" />
+        <Spin size="large" tip="Loading dashboard..." />
       </div>
     );
+  }
+
+  if (error) {
+    return <Alert message={error} type="error" showIcon />;
   }
 
   return (
@@ -70,64 +105,71 @@ const Dashboard = () => {
         backgroundColor: "#ffffff",
         minHeight: "100vh",
       }}
-    >
-      {/* Top row: Members, Mentors, Secretaries */}
-      <Row gutter={[10, 10]}>
-        <Col span={8}>
+    >      
+      {/* Top row stats */}
+      <Row gutter={[16, 16]}>
+        <Col xs={24} sm={12} md={8}>
+          <Card>
             <Statistic
               title="Total Members"
-              value={stats?.totalMembers ?? "No data"}
+              value={stats?.totalMembers ?? 0}
               prefix={<TeamOutlined />}
-              valueStyle={{ fontSize: isMobile ? "16px" : "24px" }}
             />
+          </Card>
         </Col>
-        <Col span={8}>
+        <Col xs={24} sm={12} md={8}>
+          <Card>
             <Statistic
               title="Mentors"
-              value={stats?.totalMentors ?? "No data"}
+              value={stats?.totalMentors ?? 0}
               prefix={<UserOutlined />}
-              valueStyle={{ fontSize: isMobile ? "16px" : "24px" }}
             />
+          </Card>
         </Col>
-        <Col span={8}>
+        <Col xs={24} sm={12} md={8}>
+          <Card>
             <Statistic
               title="Secretaries"
-              value={stats?.totalSecretaries ?? "No data"}
+              value={stats?.totalSecretaries ?? 0}
               prefix={<UsergroupAddOutlined />}
-              valueStyle={{ fontSize: isMobile ? "16px" : "24px" }}
             />
+          </Card>
         </Col>
       </Row>
 
-      {/* Middle row: hide on mobile */}
+      {/* Middle row - hidden on mobile */}
       {!isMobile && (
-        <Row gutter={[16, 16]} style={{ marginTop: "40px" }}>
+        <Row gutter={[16, 16]} style={{ marginTop: 24 }}>
           <Col span={8}>
+            <Card>
               <Statistic
                 title="Total Nations"
-                value={stats?.totalNations ?? "No data"}
+                value={stats?.totalNations ?? 0}
                 prefix={<DeploymentUnitOutlined />}
               />
+            </Card>
           </Col>
           <Col span={8}>
+            <Card>
               <Statistic
                 title="Total Points"
-                value={stats?.totalPoints ?? "No data"}
+                value={stats?.totalPoints ?? 0}
                 prefix={<TrophyOutlined />}
               />
+            </Card>
           </Col>
           <Col span={8}>
-              <h3 style={{ marginTop: 10 }}>🏆 Leading Nation</h3>
-              <div style={{ fontSize: 18, fontWeight: "bold", marginTop: 8 }}>
-                {stats?.topNation ?? "No data"}
-              </div>
+            <Card>
+              <Title level={5} style={{ marginBottom: 8 }}>🏆 Leading Nation</Title>
+              <Text strong style={{ fontSize: 18 }}>
+                {stats?.topNation || "Not available"}
+              </Text>
+            </Card>
           </Col>
         </Row>
       )}
 
       <div style={{ marginTop: 30 }}>
-        <h2 style={{ textAlign: "center", marginBottom: 30 }}>
-        </h2>
         <NationPerformanceOverview />
       </div>
     </div>

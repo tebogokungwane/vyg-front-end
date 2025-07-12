@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Button, Form, Input, Select, message } from 'antd';
+import { Button, Form, Input, Select, message, Spin, Row, Col, Card } from 'antd';
+import { LoadingOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import UserContext from '../context/UserContext';
 import "../styles/AddUserBranch.css";
@@ -11,31 +12,32 @@ const AddUserBranch = () => {
   const [nations, setNations] = useState([]);
   const [churches, setChurches] = useState([]);
   const [role, setRole] = useState("MENTOR");
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const { user } = useContext(UserContext);
 
-  const prefixSelector = (
-    <Form.Item name="prefix" noStyle>
-      <Select style={{ width: 70 }} defaultValue="27">
-        <Option value="27">+27</Option>
-        <Option value="1">+1</Option>
-        <Option value="44">+44</Option>
-      </Select>
-    </Form.Item>
-  );
-
   useEffect(() => {
-    axios
-      .get("http://localhost:2025/api/nations")
-      .then((res) => setNations(res.data))
-      .catch(() => message.error("Failed to load Nations"));
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const [nationsRes, churchesRes] = await Promise.all([
+          axios.get("http://localhost:2025/api/nations"),
+          axios.get("http://localhost:2025/api/addresses")
+        ]);
+        setNations(nationsRes.data);
+        setChurches(churchesRes.data);
+      } catch (error) {
+        message.error("Failed to load data");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    axios
-      .get("http://localhost:2025/api/addresses")
-      .then((res) => setChurches(res.data))
-      .catch(() => message.error("Failed to load Churches"));
+    fetchData();
   }, []);
 
   const onFinish = async (values) => {
+    setSubmitting(true);
     try {
       const payload = {
         name: values.firstName,
@@ -59,79 +61,137 @@ const AddUserBranch = () => {
       form.resetFields();
     } catch (error) {
       console.error("❌ Failed to create member:", error);
-      message.error("Failed to register member. Please try again.");
+      message.error(error.response?.data?.message || "Failed to register member. Please try again.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />
+      </div>
+    );
+  }
+
   return (
-    <div className="add-user-wrapper">
-      <div className="add-user-form">
-        <Form form={form} layout="vertical" onFinish={onFinish} autoComplete="off">
-          <Form.Item name="firstName" label="First Name" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-
-          <Form.Item name="lastName" label="Last Name" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-
-          <Form.Item name="email" label="Email" rules={[{ type: "email", message: "Invalid email" }]}>
-            <Input />
-          </Form.Item>
-
-          <Form.Item name="phone" label="Phone Number" rules={[{ required: true }]}>
-            <Input addonBefore={prefixSelector} style={{ width: "100%" }} />
-          </Form.Item>
-
-          <Form.Item name="gender" label="Gender" rules={[{ required: true }]}>
-            <Select placeholder="Select gender">
-              <Option value="male">Male</Option>
-              <Option value="female">Female</Option>
-            </Select>
-          </Form.Item>
-
-          <Form.Item name="role" label="Role" rules={[{ required: true }]}>
-            <Select placeholder="Select role" onChange={(value) => setRole(value)}>
-              <Option value="MENTOR">MENTOR</Option>
-              <Option value="SECRETARY">SECRETARY</Option>
-              <Option value="PR">PR</Option>
-            </Select>
-          </Form.Item>
-
-          {role !== "PR" && (
-            <>
-              <Form.Item name="residentialAddress" label="Residential Address" rules={[{ required: true }]}>
-                <Input.TextArea rows={3} />
+    <div className="add-user-container">
+     
+        <Form 
+          form={form} 
+          layout="vertical" 
+          onFinish={onFinish} 
+          autoComplete="off"
+          className="responsive-form"
+        >
+          <Row gutter={[16, 8]}>
+            <Col xs={24} sm={12}>
+              <Form.Item 
+                name="firstName" 
+                label="First Name" 
+                rules={[{ required: true, message: 'Please input first name!' }]}
+              >
+                <Input placeholder="Enter first name" />
               </Form.Item>
+            </Col>
 
-              <Form.Item name="nation" label="Nation" rules={[{ required: true }]}>
-                <Select
-                  placeholder="Select nation"
-                  onChange={(value, option) => {
-                    form.setFieldsValue({
-                      nationId: option.key,
-                      nationName: option.label,
-                    });
-                  }}
-                >
-                  {nations.map((n) => (
-                    <Option key={n.id} value={n.nation} label={n.nation}>{n.nation}</Option>
-                  ))}
+            <Col xs={24} sm={12}>
+              <Form.Item 
+                name="lastName" 
+                label="Last Name" 
+                rules={[{ required: true, message: 'Please input last name!' }]}
+              >
+                <Input placeholder="Enter last name" />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={[16, 8]}>
+            <Col xs={24} sm={12}>
+              <Form.Item 
+                name="email" 
+                label="Email" 
+                rules={[
+                  { required: true, message: 'Please input email!' },
+                  { type: "email", message: "Invalid email format" }
+                ]}
+              >
+                <Input placeholder="Enter email" />
+              </Form.Item>
+            </Col>
+
+            <Col xs={24} sm={12}>
+              <Form.Item
+                name="phone"
+                label="Phone Number"
+                rules={[
+                  { required: true, message: 'Please input phone number!' },
+                  {
+                    pattern: /^0[6-8][0-9]{8}$/,
+                    message: 'Enter a valid SA number (e.g. 0821234567)',
+                  },
+                ]}
+              >
+                <Input maxLength={10} placeholder="e.g. 0821234567" />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={[16, 8]}>
+            <Col xs={24} sm={12}>
+              <Form.Item 
+                name="gender" 
+                label="Gender" 
+                rules={[{ required: true, message: 'Please select gender!' }]}
+              >
+                <Select placeholder="Select gender">
+                  <Option value="male">Male</Option>
+                  <Option value="female">Female</Option>
                 </Select>
               </Form.Item>
+            </Col>
 
-              <Form.Item name="nationId" noStyle hidden><Input /></Form.Item>
-              <Form.Item name="nationName" noStyle hidden><Input /></Form.Item>
-            </>
+            <Col xs={24} sm={12}>
+              <Form.Item 
+                name="role" 
+                label="Role" 
+                rules={[{ required: true, message: 'Please select role!' }]}
+              >
+                <Select
+                  placeholder="Select role"
+                  onChange={(value) => setRole(value)}
+                >
+                  <Option value="MENTOR">MENTOR</Option>
+                  <Option value="SECRETARY">SECRETARY</Option>
+                  <Option value="PR">PR</Option>
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
+
+          {role !== "PR" && (
+            <Form.Item
+              name="residentialAddress"
+              label="Residential Address"
+              rules={[{ required: true, message: 'Please input residential address!' }]}
+            >
+              <Input.TextArea rows={3} placeholder="Enter full residential address" />
+            </Form.Item>
           )}
 
-          <Form.Item name="churchId" label="Church" rules={[{ required: true }]}>
+          <Form.Item 
+            name="churchId" 
+            label="Church" 
+            rules={[{ required: true, message: 'Please select church!' }]}
+          >
             <Select
               showSearch
               placeholder="Select church"
               filterOption={(input, option) =>
                 option.children.toLowerCase().includes(input.toLowerCase())
               }
+              optionFilterProp="children"
             >
               {churches.map((church) => (
                 <Option key={church.id} value={church.id}>
@@ -141,13 +201,19 @@ const AddUserBranch = () => {
             </Select>
           </Form.Item>
 
-          <Form.Item>
-            <Button type="primary" htmlType="submit" style={{ width: "100%" }}>
-              Submit
+          <Form.Item className="submit-button-wrapper">
+            <Button 
+              type="primary" 
+              htmlType="submit" 
+              block
+              size="large"
+              loading={submitting}
+              disabled={submitting}
+            >
+              {submitting ? 'Submitting...' : 'Submit'}
             </Button>
           </Form.Item>
         </Form>
-      </div>
     </div>
   );
 };

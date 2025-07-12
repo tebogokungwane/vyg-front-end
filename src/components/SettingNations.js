@@ -55,11 +55,20 @@ const SettingNations = () => {
   };
 
   const updateNationName = async (id, name) => {
+    const token = localStorage.getItem("token");
+    
     try {
-      await axios.put(`http://localhost:2025/api/nations/${id}/name`, {
-        nation: name,
-      });
-      message.success(`Nation name updated`);
+      await axios.put(
+        `http://localhost:2025/api/nations/${id}/name`,
+        { nation: name },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+        }
+      );
+      message.success("Nation name updated");
       fetchNations();
     } catch (error) {
       console.error("Failed to update nation name:", error);
@@ -70,7 +79,7 @@ const SettingNations = () => {
   const handleImageUpload = async (file, index) => {
     const nation = nations[index];
     const formData = new FormData();
-    formData.append("nation", JSON.stringify({ nation: nation.nation }));
+    formData.append("nationName", JSON.stringify({ nation: nation.nation }));
     formData.append("imageFile", file);
 
     try {
@@ -111,7 +120,7 @@ const SettingNations = () => {
 
   const handleDelete = async (nationId) => {
     try {
-      // const response = await axios.delete(`http://localhost:2025/api/nations/${nationId}`);
+      await axios.delete(`http://localhost:2025/api/nations/${nationId}`);
       setNations(nations.filter((n) => n.id !== nationId));
       message.success(`Deleted nation with ID: ${nationId}`);
     } catch (err) {
@@ -126,7 +135,7 @@ const SettingNations = () => {
     }
 
     const formData = new FormData();
-    formData.append("nation", JSON.stringify({ nation: newNationName }));
+    formData.append("nationName", JSON.stringify({ nation: newNationName }));
     formData.append("imageFile", newNationImage);
 
     try {
@@ -151,14 +160,29 @@ const SettingNations = () => {
   return (
     <div className="setting-nations-wrapper">
       <div className="setting-nations-inner">
-        <div style={{ textAlign: "right", marginBottom: 16 }}>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => setIsModalVisible(true)}
-          >
-            Create Nation
-          </Button>
+        <div style={{ textAlign: "right", marginBottom: 100 }}>
+          <div className="create-button-wrapper">
+            {/* Full-size button for large screens */}
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => setIsModalVisible(true)}
+              className="create-button-large"
+            >
+              Create Nation
+            </Button>
+
+            {/* FAB button for small screens */}
+            <Button
+              type="primary"
+              shape="circle"
+              size="large"
+              icon={<PlusOutlined />}
+              className="fab-button"
+              onClick={() => setIsModalVisible(true)}
+              title="Create Nation"
+            />
+          </div>
         </div>
 
         <Modal

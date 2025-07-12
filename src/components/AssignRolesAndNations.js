@@ -3,7 +3,6 @@ import {
   Table,
   Form,
   Input,
-  message,
   Select,
   Typography,
   Spin,
@@ -86,7 +85,7 @@ const EditableCell = ({
   );
 };
 
-const ViewAllMembers = () => {
+const AssignRolesAndNations = () => {
   const [form] = Form.useForm();
   const [data, setData] = useState([]);
   const [originalData, setOriginalData] = useState([]);
@@ -431,4 +430,4 @@ const ViewAllMembers = () => {
   );
 };
 
-export default ViewAllMembers;
+export default AssignRolesAndNations;

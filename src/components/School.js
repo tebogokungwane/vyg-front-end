@@ -1,6 +1,4 @@
-// School.js
 import React, { useState, useEffect, useContext } from "react";
-import axios from "axios";
 import {
   Form,
   Input,
@@ -9,21 +7,33 @@ import {
   Table,
   Typography,
   Popconfirm,
-  Modal
+  Modal,
+  Alert,
+  Layout,
+  message,
+  Card,
+  Space,
+  Grid,
 } from "antd";
+import axios from "axios";
 import UserContext from "../context/UserContext";
-import { injectResponsiveStyles } from "../styles/responsiveTableStyle";
-import { message } from "antd";
-import { Alert } from 'antd';
-
 
 const { Option } = Select;
+const { Header, Content, Footer } = Layout;
+const { Title } = Typography;
+const { useBreakpoint } = Grid;
 
-const EditableCell = ({ editing, dataIndex, title, inputType, children, mentorsList, ...restProps }) => {
-  let inputNode;
-
-  if (dataIndex === "mentor") {
-    inputNode = (
+const EditableCell = ({
+  editing,
+  dataIndex,
+  title,
+  inputType,
+  children,
+  mentorsList,
+  ...restProps
+}) => {
+  const inputNode =
+    dataIndex === "mentor" ? (
       <Select style={{ width: "100%" }}>
         {mentorsList?.map((mentor) => (
           <Option key={mentor.id} value={`${mentor.name} ${mentor.surname}`}>
@@ -31,10 +41,11 @@ const EditableCell = ({ editing, dataIndex, title, inputType, children, mentorsL
           </Option>
         ))}
       </Select>
+    ) : inputType === "number" ? (
+      <Input type="number" />
+    ) : (
+      <Input />
     );
-  } else {
-    inputNode = inputType === "number" ? <Input type="number" /> : <Input />;
-  }
 
   return (
     <td {...restProps}>
@@ -53,9 +64,9 @@ const EditableCell = ({ editing, dataIndex, title, inputType, children, mentorsL
   );
 };
 
-
 const School = () => {
   const { user } = useContext(UserContext);
+  const screens = useBreakpoint();
   const [form] = Form.useForm();
   const [schoolForm] = Form.useForm();
   const [data, setData] = useState([]);
@@ -63,25 +74,51 @@ const School = () => {
   const [searchText, setSearchText] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [mentors, setMentors] = useState([]);
-
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-  const [showUpdateSuccessAlert, setShowUpdateSuccessAlert] = useState(false); // ✅ for "edit"
-
+  const [showUpdateSuccessAlert, setShowUpdateSuccessAlert] = useState(false);
 
   useEffect(() => {
-    injectResponsiveStyles(); // ✅ Inject styles for small screens
-  }, []);
+    if (user?.address?.id) {
+      fetchSchools();
+      fetchMentors();
+    }
+  }, [user]);
+
+  const fetchSchools = async () => {
+    try {
+      const res = await axios.get(`http://localhost:2025/api/schools/${user.address.id}`);
+      const formatted = res.data.map((school, index) => ({
+        key: index.toString(),
+        id: school.id,
+        name: school.schoolName,
+        address: school.schoolAddress,
+        personToContact: school.personToContact,
+        contact: school.contactDetails,
+        mentor: school.mentor,
+      }));
+      setData(formatted);
+    } catch (err) {
+      console.error("Failed to load schools", err);
+    }
+  };
+
+  const fetchMentors = async () => {
+    try {
+      const res = await axios.get(`http://localhost:2025/api/member/mentor/address/${user.address.id}`);
+      setMentors(res.data);
+    } catch (err) {
+      console.error("Failed to load mentors", err);
+    }
+  };
 
   const isEditing = (record) => record.key === editingKey;
 
   const edit = (record) => {
-    form.setFieldsValue({ name: "", address: "", contact: "", mentor: "", ...record });
+    form.setFieldsValue({ ...record });
     setEditingKey(record.key);
   };
 
-  const cancel = () => {
-    setEditingKey("");
-  };
+  const cancel = () => setEditingKey("");
 
   const save = async (key) => {
     try {
@@ -89,15 +126,9 @@ const School = () => {
       const newData = [...data];
       const index = newData.findIndex((item) => key === item.key);
       const item = newData[index];
-  
-      if (!item.id) {
-        console.error("Missing ID for update:", item);
-        message.error("Missing school ID. Cannot update.");
-        return;
-      }
-  
+      if (!item.id) return message.error("Missing school ID.");
       const updated = { ...item, ...row };
-  
+
       const response = await axios.put(`http://localhost:2025/api/schools/${item.id}`, {
         schoolName: updated.name,
         schoolAddress: updated.address,
@@ -105,31 +136,22 @@ const School = () => {
         contactDetails: updated.contact,
         mentor: updated.mentor,
       });
-  
+
       if (response.status === 200) {
         newData.splice(index, 1, updated);
         setData(newData);
         setEditingKey("");
-     
-        setShowUpdateSuccessAlert(true); // ✅ show update alert
-        setTimeout(() => setShowUpdateSuccessAlert(false), 3000); // hide after 3 seconds
+        setShowUpdateSuccessAlert(true);
+        setTimeout(() => setShowUpdateSuccessAlert(false), 3000);
       } else {
-        message.error("Update failed with unexpected status.");
+        message.error("Update failed.");
       }
     } catch (err) {
-      console.error("Update failed:", err);
-      message.error(err.response?.data?.message || "Failed to update school.");
+      message.error(err.response?.data?.message || "Update failed.");
     }
   };
-  
 
-
-
-  const showModal = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleAddSchool = (values) => {
+  const handleAddSchool = async (values) => {
     const payload = {
       schoolName: values.schoolName,
       schoolAddress: values.schoolAddress,
@@ -137,92 +159,74 @@ const School = () => {
       contactDetails: values.contactDetails,
       mentor: values.mentor || "",
       addressId: user?.address?.id,
-      createBy: `${user.name} ${user.surname}`
+      createBy: `${user.name} ${user.surname}`,
     };
 
-    axios
-      .post("http://localhost:2025/api/schools/register", payload)
-      .then(() => {
-        setIsModalOpen(false);
-        schoolForm.resetFields();
-        setShowSuccessAlert(true); // ✅ Show success alert
-        setTimeout(() => setShowSuccessAlert(false), 3000); // ✅ Hide after 3s
-        return axios.get(`http://localhost:2025/api/schools/${user.address.id}`);
-
-      })
-      .then((res) => {
-        const formatted = res.data.map((school, index) => ({
-          key: index.toString(),
-          id: school.id,
-          name: school.schoolName,
-          address: school.schoolAddress,
-          personToContact: school.personToContact,
-          contact: school.contactDetails,
-          mentor: school.mentor
-        }));
-        setData(formatted);
-      })
-      .catch((err) => {
-        console.error("Error registering or fetching schools", err);
-      });
+    try {
+      await axios.post("http://localhost:2025/api/schools/register", payload);
+      setIsModalOpen(false);
+      schoolForm.resetFields();
+      setShowSuccessAlert(true);
+      setTimeout(() => setShowSuccessAlert(false), 3000);
+      fetchSchools();
+    } catch (err) {
+      message.error("Failed to register school.");
+    }
   };
-  useEffect(() => {
-    if (user?.address?.id) {
-      axios.get(`http://localhost:2025/api/schools/${user.address.id}`)
-        .then((res) => {
-          const formatted = res.data.map((school, index) => ({
-            key: index.toString(),
-            id: school.id, // ✅ include ID for PUT requests
-            name: school.schoolName,
-            address: school.schoolAddress,
-            personToContact: school.personToContact,
-            contact: school.contactDetails,
-            mentor: school.mentor
-          }));
-          setData(formatted);
-        })
-        .catch((err) => console.error("Failed to load schools", err));
-    }
-  }, [user]);
-
-
-  useEffect(() => {
-    if (user?.address?.id) {
-      axios
-        .get(`http://localhost:2025/api/member/mentor/address/${user.address.id}`)
-        .then((res) => setMentors(res.data))
-        .catch((err) => console.error("Failed to load mentors", err));
-    }
-  }, [user]);
-  
 
   const columns = [
-    { title: "School Name", dataIndex: "name", editable: true },
-    { title: "Address", dataIndex: "address", editable: true },
-    { title: "Person to contact", dataIndex: "personToContact", editable: true },
-    { title: "Contact", dataIndex: "contact", editable: true },
-    { title: "Mentor", dataIndex: "mentor", editable: true },
+    { 
+      title: "School Name", 
+      dataIndex: "name", 
+      editable: true,
+      width: "20%",
+    },
+    { 
+      title: "Address", 
+      dataIndex: "address", 
+      editable: true,
+      width: "20%",
+    },
+    { 
+      title: "Person to Contact", 
+      dataIndex: "personToContact", 
+      editable: true,
+      width: "15%",
+    },
+    { 
+      title: "Contact", 
+      dataIndex: "contact", 
+      editable: true,
+      width: "15%",
+    },
+    { 
+      title: "Mentor", 
+      dataIndex: "mentor", 
+      editable: true,
+      width: "15%",
+    },
     {
       title: "Actions",
       dataIndex: "operation",
+      width: "15%",
       render: (_, record) => {
         const editable = isEditing(record);
         return editable ? (
-          <span>
-            <Typography.Link onClick={() => save(record.key)} style={{ marginRight: 8 }}>
+          <Space>
+            <Typography.Link onClick={() => save(record.key)}>
               Save
             </Typography.Link>
             <Popconfirm title="Cancel changes?" onConfirm={cancel}>
-              <a>Cancel</a>
+              <Typography.Link>Cancel</Typography.Link>
             </Popconfirm>
-          </span>
+          </Space>
         ) : (
           <Typography.Link disabled={editingKey !== ""} onClick={() => edit(record)}>
             Edit
           </Typography.Link>
         );
-      }
-    }
+      },
+    },
   ];
 
   const mergedColumns = columns.map((col) => {
@@ -235,98 +239,181 @@ const School = () => {
         dataIndex: col.dataIndex,
         title: col.title,
         editing: isEditing(record),
-        mentorsList: mentors // ✅ Pass mentors list to EditableCell
+        mentorsList: mentors,
       }),
     };
   });
-  
 
-  const filteredData = data.filter((item) => item.name.toLowerCase().includes(searchText.toLowerCase()));
+  const filteredData = data.filter((item) =>
+    item.name.toLowerCase().includes(searchText.toLowerCase())
+  );
 
   return (
+    <Layout style={{ minHeight: "100vh", background: "#fff" }}>
+ 
 
+      <Content style={{ 
+        padding: "24px",
+        background: "#fff",
+        maxWidth: "100vw",
+        overflow: "hidden",
+      }}>
+        <Card
+          bordered={false}
+          style={{ 
+            boxShadow: "0 2px 8px rgba(0,0,0,0.1)", 
+            borderRadius: 8,
+            background: "#fff",
+          }}
+          bodyStyle={{ padding: screens.xs ? "16px 8px" : "24px" }}
+        >
+          <div style={{ marginBottom: 24 }}>
+            <Space 
+              style={{ 
+                display: "flex", 
+                justifyContent: "space-between", 
+                marginBottom: 16,
+                flexDirection: screens.xs ? "column" : "row",
+                gap: screens.xs ? "12px" : "0",
+                width: "100%",
+              }}
+            >
+              <Button 
+                type="primary" 
+                onClick={() => setIsModalOpen(true)}
+                style={{ height: 40, width: screens.xs ? "100%" : "auto" }}
+              >
+                Add School
+              </Button>
+              <Input
+                placeholder="Search schools..."
+                style={{ 
+                  width: screens.xs ? "100%" : 300, 
+                  height: 40 
+                }}
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                allowClear
+              />
+            </Space>
 
+            {showUpdateSuccessAlert && (
+              <Alert 
+                message="School updated successfully!" 
+                type="success" 
+                showIcon 
+                closable 
+                style={{ marginBottom: 16 }} 
+              />
+            )}
+            {showSuccessAlert && (
+              <Alert 
+                message="School saved successfully!" 
+                type="success" 
+                showIcon 
+                closable 
+                style={{ marginBottom: 16 }} 
+              />
+            )}
+          </div>
 
-    <div style={{ padding: "50px", margin: "0 auto", width: "100%", overflowX: "auto" }}>
-  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 20 }}>
-    <Button type="primary" onClick={showModal}>
-      Add School
-    </Button>
-  </div>
+          <div style={{ 
+            width: "100%",
+            overflowX: "auto",
+          }}>
+            <Form form={form} component={false}>
+              <Table
+                components={{ body: { cell: EditableCell } }}
+                bordered
+                dataSource={filteredData}
+                columns={mergedColumns}
+                rowClassName="editable-row"
+                pagination={{ 
+                  position: ["bottomRight"],
+                  pageSize: 10,
+                  showSizeChanger: false,
+                  style: { padding: "16px 0" }
+                }}
+                scroll={{ x: "max-content" }}
+                style={{ 
+                  fontSize: "14px",
+                  minWidth: screens.xs ? "800px" : "100%",
+                }}
+                size="middle"
+              />
+            </Form>
+          </div>
+        </Card>
 
-  {showUpdateSuccessAlert && (
-    <Alert
-      message="School updated successfully!"
-      type="success"
-      showIcon
-      style={{ marginBottom: 16 }}
-    />
-  )}
+        <Modal 
+          title={<span style={{ fontSize: "18px" }}>Register School</span>} 
+          open={isModalOpen} 
+          onCancel={() => setIsModalOpen(false)} 
+          footer={null}
+          centered
+        >
+          <Form form={schoolForm} layout="vertical" onFinish={handleAddSchool}>
+            <Form.Item 
+              name="schoolName" 
+              label="School Name" 
+              rules={[{ required: true, message: "Please input school name!" }]}
+            >
+              <Input size="large" />
+            </Form.Item>
+            <Form.Item 
+              name="schoolAddress" 
+              label="Address" 
+              rules={[{ required: true, message: "Please input school address!" }]}
+            >
+              <Input size="large" />
+            </Form.Item>
+            <Form.Item 
+              name="personToContact" 
+              label="Person to Contact" 
+              rules={[{ required: true, message: "Please input contact person!" }]}
+            >
+              <Input size="large" />
+            </Form.Item>
+            <Form.Item 
+              name="contactDetails" 
+              label="Contact Number" 
+              rules={[{ required: true, message: "Please input contact number!" }]}
+            >
+              <Input size="large" />
+            </Form.Item>
+            <Form.Item name="mentor" label="Mentor">
+              <Select 
+                placeholder="Select mentor (optional)"
+                size="large"
+                showSearch
+                optionFilterProp="children"
+                filterOption={(input, option) =>
+                  option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                }
+              >
+                {mentors.map((mentor) => (
+                  <Option key={mentor.id} value={`${mentor.name} ${mentor.surname}`}>
+                    {mentor.name} {mentor.surname}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+            <Form.Item>
+              <Button 
+                type="primary" 
+                htmlType="submit" 
+                size="large"
+                style={{ width: "100%" }}
+              >
+                Submit
+              </Button>
+            </Form.Item>
+          </Form>
+        </Modal>
+      </Content>
 
-  {showSuccessAlert && (
-    <Alert
-      message="School saved successfully!"
-      type="success"
-      showIcon
-      style={{ marginBottom: 16 }}
-    />
-  )}
-
-  <Input
-    placeholder="Search schools..."
-    style={{ marginBottom: 16, width: "100%" }}
-    value={searchText}
-    onChange={(e) => setSearchText(e.target.value)}
-  />
-
-
-      <Form form={form} component={false}>
-        <Table
-          components={{ body: { cell: EditableCell } }}
-          bordered
-          dataSource={filteredData}
-          columns={mergedColumns}
-          rowClassName="editable-row"
-          pagination={{ onChange: cancel }}
-          scroll={{ x: "max-content" }} // ✅ Scrollable if needed
-        />
-      </Form>
-
-      <Modal title="Register School" open={isModalOpen} onCancel={() => setIsModalOpen(false)} footer={null}>
-        <Form form={schoolForm} layout="vertical" onFinish={handleAddSchool}>
-          <Form.Item name="schoolName" label="School Name" rules={[{ required: true, message: "Please enter school name!" }]}>
-            <Input />
-          </Form.Item>
-
-          <Form.Item name="schoolAddress" label="Address" rules={[{ required: true, message: "Please enter school address!" }]}>
-            <Input />
-          </Form.Item>
-
-          <Form.Item name="personToContact" label="Person to Contact" rules={[{ required: true, message: "Please enter person to contact!" }]}>
-            <Input />
-          </Form.Item>
-
-          <Form.Item name="contactDetails" label="Contact Number" rules={[{ required: true, message: "Please enter contact number!" }]}>
-            <Input />
-          </Form.Item>
-
-          <Form.Item name="mentor" label="Mentor">
-            <Select placeholder="Select mentor (optional)">
-              {mentors.map((mentor) => (
-                <Option key={mentor.id} value={`${mentor.name} ${mentor.surname}`}>
-                  {mentor.name} {mentor.surname}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
-          <Form.Item>
-            <Button type="primary" htmlType="submit" style={{ width: "100%" }}>
-              Submit
-            </Button>
-          </Form.Item>
-        </Form>
-      </Modal>
-    </div>
+     
+    </Layout>
   );
 };
 

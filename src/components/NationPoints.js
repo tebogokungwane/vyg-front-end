@@ -14,34 +14,37 @@ const NationPoints = () => {
   const [selectedNation, setSelectedNation] = useState(null);
   const [filteredData, setFilteredData] = useState([]);
   const { user } = useContext(UserContext);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchNationPoints = async () => {
       if (!user?.address?.id) {
         message.error("User address ID not found.");
+        setLoading(false);
         return;
       }
 
       try {
-        const res = await axios.get(
-          `http://localhost:2025/api/points/summary/address/${user.address.id}`
-        );
-        const results = res.data;
-        setData(results);
+        const res = await axios.get(`http://localhost:2025/api/points/summary/address/${user.address.id}`);
+        console.log("✅ API Response:", res.data); // ✅ Debugging log
 
-        if (results.length > 0) {
-          setSelectedWeek(results[0].weekNumber);
-          setSelectedMonth(results[0].month);
-          setSelectedYear(results[0].year);
+        setData(res.data);
+        setLoading(false);
+
+        if (res.data.length > 0) {
+          setSelectedWeek(res.data[0].weekNumber);
+          setSelectedMonth(res.data[0].month);
+          setSelectedYear(res.data[0].year);
         }
       } catch (err) {
-        console.error("Error fetching nation points:", err);
+        console.error("❌ Error fetching nation points:", err);
         message.error("Failed to load nation points");
+        setLoading(false);
       }
     };
 
     fetchNationPoints();
-  }, [user]);
+  },
 
   useEffect(() => {
     let filtered = data;
@@ -61,7 +64,7 @@ const NationPoints = () => {
 
     filtered.sort((a, b) => b.totalPointsEarnedPerWeek - a.totalPointsEarnedPerWeek);
     setFilteredData(filtered);
-  }, [selectedWeek, selectedMonth, selectedYear, selectedNation, data]);
+  }, [selectedWeek, selectedMonth, selectedYear, selectedNation, data]))
 
   const uniqueWeeks = [...new Set(data.map((item) => item.weekNumber))];
   const uniqueMonths = [...new Set(data.map((item) => item.month))];
