@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Button, Form, Input, Select, message, Alert, Spin } from 'antd';
-import axios from 'axios';
+import axios from "../utils/axios";
 import UserContext from '../context/UserContext';
 
 const { Option } = Select;
@@ -13,7 +13,7 @@ const AddMember = () => {
   const { user } = useContext(UserContext);
 
   useEffect(() => {
-    axios.get("http://localhost:2025/api/nations")
+    axios.get( `/api/nations`)
       .then((res) => setNations(res.data))
       .catch((err) => {
         console.error("❌ Error fetching Nations:", err);
@@ -42,7 +42,7 @@ const AddMember = () => {
         createBy: `${user?.name} ${user?.surname}`,
       };
 
-      const response = await axios.post("http://localhost:2025/api/member/register", payload);
+      const response = await axios.post( `/api/member/register`, payload);
       message.success(`🎉 ${response.data.name} ${response.data.surname} registered successfully!`);
       setAlertInfo({ type: 'success', text: `${response.data.name} ${response.data.surname} registered successfully!` });
       form.resetFields();

@@ -13,7 +13,7 @@ import {
   Empty,
   Tag
 } from 'antd';
-import axios from 'axios';
+import axios from '../utils/axios';
 import UserContext from '../context/UserContext';
 
 const { Title, Text } = Typography;
@@ -35,7 +35,7 @@ const PendingPointsApproval = () => {
       
       // Fetch events if not already loaded
       if (Object.keys(eventsMap).length === 0) {
-        const eventsRes = await axios.get("http://localhost:2025/api/base-events/allEvents");
+        const eventsRes = await axios.get( `/api/base-events/allEvents`);
         const newEventsMap = {};
         eventsRes.data.forEach((e) => {
           newEventsMap[e.id] = e.name;
@@ -44,7 +44,7 @@ const PendingPointsApproval = () => {
       }
       
       // Fetch pending points
-      const res = await axios.get(`http://localhost:2025/api/points/pending/address/${user.address.id}`);
+      const res = await axios.get(`/api/points/pending/address/${user.address.id}`);
       
       const enriched = res.data.map(item => ({
         ...item,
@@ -92,7 +92,7 @@ const PendingPointsApproval = () => {
       setApproving(true);
       
       const promises = group.records.map((record) =>
-        axios.put(`http://localhost:2025/api/points/approve/${record.id}`, null, {
+        axios.put(`/api/points/approve/${record.id}`, null, {
           params: {
             approvedBy: `${user.name} ${user.surname}`
           }
@@ -122,7 +122,7 @@ const PendingPointsApproval = () => {
   const handleReject = async (group) => {
     try {
       const promises = group.records.map((record) =>
-        axios.delete(`http://localhost:2025/api/points/reject/${record.id}`)
+        axios.delete(`/api/points/reject/${record.id}`)
       );
       await Promise.all(promises);
       message.success("Points rejected successfully");
@@ -185,7 +185,7 @@ const PendingPointsApproval = () => {
   ];
 
   return (
-    <div style={{ overflowX: 'auto' }}>
+    <div style={{ overflowX: 'auto', padding: '50px 20px 20px'}}>
     <Table
       columns={columns}
       dataSource={groupedPoints}

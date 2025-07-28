@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Table, Button, message } from "antd";
-import axios from "axios";
+import axios from "../utils/axios";
 
 const PendingChanges = () => {
   const [pendingChanges, setPendingChanges] = useState([]);
@@ -11,7 +11,7 @@ const PendingChanges = () => {
 
   const fetchPendingChanges = async () => {
     try {
-      const res = await axios.get("http://localhost:2025/api/nations/pending-changes");
+      const res = await axios.get( `/api/nations/pending-changes`);
       setPendingChanges(res.data);
     } catch (err) {
       message.error("Failed to fetch pending changes.");
@@ -20,7 +20,7 @@ const PendingChanges = () => {
 
   const handleApprove = async (id) => {
     try {
-      await axios.put(`http://localhost:2025/api/nations/approve-change/${id}`);
+      await axios.put(`/api/nations/approve-change/${id}`);
       message.success("Nation change approved.");
       fetchPendingChanges();
     } catch (err) {
@@ -30,7 +30,7 @@ const PendingChanges = () => {
 
   const handleReject = async (id) => {
     try {
-      await axios.delete(`http://localhost:2025/api/nations/reject-change/${id}`);
+      await axios.delete('/api/nations/reject-change/${id}');
       message.success("Nation change rejected.");
       fetchPendingChanges();
     } catch (err) {

@@ -13,7 +13,7 @@ import {
   message,
 } from "antd";
 import { UploadOutlined, PlusOutlined } from "@ant-design/icons";
-import axios from "axios";
+import axios from "../utils/axios";
 
 const ManageNations = () => {
   const [nations, setNations] = useState([]);
@@ -24,7 +24,7 @@ const ManageNations = () => {
 
   const fetchNations = async () => {
     try {
-      const res = await axios.get("http://localhost:2025/api/nations");
+      const res = await axios.get( `/api/nations`);
       setNations(res.data);
     } catch (err) {
       message.error("Failed to fetch nations");
@@ -43,7 +43,7 @@ const ManageNations = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:2025/api/nations/${id}`);
+      await axios.delete(`/api/nations/${id}`);
       message.success("Nation deleted");
       fetchNations();
     } catch {
@@ -61,12 +61,12 @@ const ManageNations = () => {
     try {
       if (editingNation) {
         await axios.put(
-          `http://localhost:2025/api/nations/${editingNation.id}`,
+          `api/nations/${editingNation.id}`,
           formData
         );
         message.success("Nation updated");
       } else {
-        await axios.post("http://localhost:2025/api/nations", formData);
+        await axios.post( `/api/nations`, formData);
         message.success("Nation added");
       }
 

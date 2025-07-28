@@ -10,7 +10,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import axios from "axios";
+import axios from "../utils/axios";
 import { Select, Row, Tabs, Radio, Card, message } from "antd";
 import UserContext from "../context/UserContext";
 
@@ -43,7 +43,7 @@ const BarChartPage = () => {
 
       try {
         const res = await axios.get(
-          `http://localhost:2025/api/nation-stats/address/${user.address.id}`
+          `/api/nation-stats/address/${user.address.id}`
         );
         setData(res.data);
 
@@ -155,15 +155,15 @@ const BarChartPage = () => {
   };
 
   return (
-    <div style={{ padding: "24px 12px", maxWidth: "100vw" }}>
-      <h2 style={{
+<div style={{ padding: "60px 20px 24px", maxWidth: "100vw" }}>
+{/* <h2 style={{
         textAlign: "center",
         marginBottom: "24px",
         fontSize: "24px",
         fontWeight: "600",
       }}>
         📋 Nation Performance Comparison
-      </h2>
+      </h2> */}
 
       <Row justify="center" style={{ marginBottom: "24px" }}>
         <Radio.Group

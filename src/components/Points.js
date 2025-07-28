@@ -15,10 +15,11 @@ import {
 import { motion } from "framer-motion";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
-import axios from "axios";
+import axios from "../utils/axios";
 import "../styles/Points.css";
 import UserContext from "../context/UserContext";
 import defaultImage from "../images/vyg.jpg";
+const baseURL = axios.defaults.baseURL;
 
 dayjs.extend(customParseFormat);
 
@@ -133,7 +134,7 @@ const Points = () => {
       };
       const token = localStorage.getItem("token");
 
-      await axios.post("http://localhost:2025/api/points/capture", payload, {
+      await axios.post(`/api/points/capture`, payload, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -198,8 +199,9 @@ const Points = () => {
                   className="nation-card"
                   cover={
                     <img
-                      src={`http://localhost:2025/api/nations/${nationObj.id}/image`}
-                      alt={nationObj.nation || "Nation"}
+                      // src={`http://localhost:2025/api/nations/${nationObj.id}/image`}
+                      src={`${baseURL}/api/nations/${nationObj.id}/image`}
+                       alt={nationObj.nation || "Nation"}
                       className="nation-image"
                       onError={(e) => {
                         e.target.onerror = null;
@@ -252,7 +254,7 @@ const Points = () => {
         {selectedNation && (
           <div className="popup-header">
             <img
-              src={`http://localhost:2025/api/nations/${selectedNation.id}/image`}
+              src={`${'baseURL'}/api/nations/${selectedNation.id}/image`}
               alt={selectedNation.nation || "Nation"}
               className="nation-image"
               onError={(e) => {

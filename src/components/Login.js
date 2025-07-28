@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import { Form, Input, Button, message } from 'antd';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import axios from "../components/axios";
+import axios from "../utils/axios";
 import UserContext from '../context/UserContext';
 import Logo from '../images/vyg.jpg';
 import { Link } from "react-router-dom";
@@ -14,7 +14,7 @@ const Login = () => {
   const onFinish = async (values) => {
     try {
 
-      const res = await axios.post("http://localhost:2025/api/member/login", {
+      const res = await axios.post( `/api/member/login`, {
         email: values.email,
         password: values.password
       }, {

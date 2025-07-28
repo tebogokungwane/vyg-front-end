@@ -15,7 +15,7 @@ import {
   DeploymentUnitOutlined,
   TrophyOutlined
 } from "@ant-design/icons";
-import axios from "../components/axios";
+import axios from "../utils/axios";
 import UserContext from "../context/UserContext";
 import NationPerformanceOverview from "../components/NationPerformanceOverview";
 

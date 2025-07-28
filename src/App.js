@@ -1,8 +1,6 @@
 import { Routes, Route, useLocation } from "react-router-dom";
 import { useState } from "react";
 import UserContext from "./context/UserContext";
-
-// Components
 import Dashboard from "./components/Dashboard";
 import AddMember from "./components/AddMember";
 import AddMentor from "./components/AddMentor";

@@ -9,7 +9,7 @@ import {
   Input,
   Alert,
 } from "antd";
-import axios from "axios";
+import axios from "../utils/axios";
 import UserContext from "../context/UserContext";
 
 const { Option } = Select;
@@ -32,7 +32,7 @@ const AdjustNationPoints = () => {
   useEffect(() => {
     const fetchNations = async () => {
       try {
-        const res = await axios.get("http://localhost:2025/api/nations");
+        const res = await axios.get( `/api/nations`);
         setNations(res.data);
       } catch (err) {
         console.error("Failed to fetch nations:", err);
@@ -60,7 +60,7 @@ const AdjustNationPoints = () => {
 
     setLoading(true);
     try {
-      await axios.post("http://localhost:2025/api/manual-adjustment/request", payload);
+      await axios.post( `/api/manual-adjustment/request`, payload);
       setShowSuccessAlert(true);
       form.resetFields();
       setTimeout(() => setShowSuccessAlert(false), 3000);

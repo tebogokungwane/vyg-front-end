@@ -11,7 +11,7 @@ import {
   Popconfirm,
   Alert,
 } from "antd";
-import axios from "axios";
+import axios from "../utils/axios";
 import "../styles/BaseEventManager.css";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 
@@ -38,7 +38,7 @@ const BaseEventManager = () => {
   const fetchEvents = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("http://localhost:2025/api/base-events/allEvents");
+      const res = await axios.get( `/api/base-events/allEvents`);
       setEvents(res.data);
     } catch (error) {
       console.error("Error fetching events", error);
@@ -70,7 +70,7 @@ const BaseEventManager = () => {
   const handleDelete = async (id) => {
     try {
       
-      await axios.delete(`http://localhost:2025/api/base-events/${id}`);
+      await axios.delete(`/api/base-events/${id}`);
       showSuccess("Event deleted successfully");
       fetchEvents();
     } catch (error) {
@@ -83,12 +83,12 @@ const BaseEventManager = () => {
     try {
       if (editingEvent) {
         await axios.put(
-          `http://localhost:2025/api/base-events/update/${editingEvent.id}`,
+          `/api/base-events/update/${editingEvent.id}`,
           values
         );
         showSuccess("Event updated successfully");
       } else {
-        await axios.post("http://localhost:2025/api/base-events/create", values);
+        await axios.post( `/api/base-events/create`, values);
         showSuccess("Event created successfully");
       }
       setModalVisible(false);

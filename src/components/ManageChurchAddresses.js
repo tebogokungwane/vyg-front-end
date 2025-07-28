@@ -10,7 +10,7 @@ import {
   message,
 } from "antd";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
-import axios from "axios";
+import axios from "../utils/axios";
 import "../styles/ManageChurchAddresses.css";
 
 const ManageChurchAddresses = () => {
@@ -25,7 +25,7 @@ const ManageChurchAddresses = () => {
   const fetchAddresses = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("http://localhost:2025/api/addresses");
+      const res = await axios.get( `/api/addresses`);
       setAddresses(res.data);
       setFilteredAddresses(res.data);
     } catch (err) {
@@ -48,7 +48,7 @@ const ManageChurchAddresses = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:2025/api/addresses/${id}`);
+      await axios.delete('/api/addresses/${id}');
       message.success("Address deleted successfully");
       fetchAddresses();
     } catch (err) {
@@ -61,12 +61,12 @@ const ManageChurchAddresses = () => {
     try {
       if (editingAddress) {
         await axios.put(
-          `http://localhost:2025/api/addresses/${editingAddress.id}`,
+          `/api/addresses/${editingAddress.id}`,
           values
         );
         message.success("Address updated successfully");
       } else {
-        await axios.post("http://localhost:2025/api/addresses", values);
+        await axios.post( `/api/addresses`, values);
         message.success("Address created successfully");
       }
       setModalVisible(false);

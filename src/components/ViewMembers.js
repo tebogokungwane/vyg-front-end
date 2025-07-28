@@ -10,7 +10,7 @@ import {
   message,
   Modal,
 } from "antd";
-import axios from "axios";
+import axios from "../utils/axios";
 import UserContext from "../context/UserContext";
 
 const { Option } = Select;
@@ -32,8 +32,8 @@ const ViewMembers = () => {
         if (!addressId) return;
 
         const [membersRes, mentorsRes] = await Promise.all([
-          axios.get(`http://localhost:2025/api/member/all-members/address/${addressId}`),
-          axios.get(`http://localhost:2025/api/member/mentor/address/${addressId}`),
+          axios.get(`/api/member/all-members/address/${addressId}`),
+          axios.get(`/api/member/mentor/address/${addressId}`),
         ]);
 
         const members = membersRes.data.map((m) => ({

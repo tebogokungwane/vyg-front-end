@@ -7,7 +7,7 @@ import {
   Legend,
 } from "chart.js";
 import { Select, Card, Row, Col, message, Radio, Tabs, Space } from "antd";
-import axios from "axios";
+import axios from "../utils/axios";
 import UserContext from "../context/UserContext";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -33,7 +33,7 @@ const NationPerformancePieChart = () => {
       }
 
       try {
-        const res = await axios.get(`http://localhost:2025/api/points/summary/address/${user.address.id}`);
+        const res = await axios.get(`/api/points/summary/address/${user.address.id}`);
         setData(res.data);
         setLoading(false);
 
@@ -208,8 +208,8 @@ const NationPerformancePieChart = () => {
   };
 
   return (
-    <div style={{ padding: '24px 12px', maxWidth: '100vw' }}>
-      <h2 style={{ 
+<div style={{ padding: "60px 20px 24px", maxWidth: "100vw" }}>
+{/* <h2 style={{ 
         textAlign: "center", 
         marginBottom: "24px",
         fontSize: '24px',
@@ -217,7 +217,7 @@ const NationPerformancePieChart = () => {
         color: '#1a1a1a'
       }}>
         🏆 Nation Performance Distribution
-      </h2>
+      </h2> */}
 
       <Row justify="center" style={{ marginBottom: '24px' }}>
         <Space size="large">

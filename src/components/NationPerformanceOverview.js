@@ -12,11 +12,11 @@ import {
   Alert,
   Typography
 } from "antd";
-import axios from "../components/axios";
+import axios from "../utils/axios";
 import defaultImage from "../images/vyg.jpg";
 import UserContext from "../context/UserContext";
 import "../styles/NationPerformanceOverview.css";
-
+const baseURL = axios.defaults.baseURL;
 const { Option } = Select;
 const { Text } = Typography;
 
@@ -38,12 +38,9 @@ const NationPerformanceOverview = () => {
         const addressId = user?.address?.id || 37;
 
         const [nationsRes, performanceRes, memberStatsRes] = await Promise.all([
-          axios.get("/api/nations"),
+          axios.get(`/api/nations`),
           axios.get(`/api/points/summary/address/${addressId}`),
           axios.get(`/api/nation-stats/member-stats/${addressId}`)
-
-          // axios.get(`/api/nations/member-stats/${addressId}`),
-          
           
         ]);
 
@@ -72,7 +69,7 @@ const NationPerformanceOverview = () => {
 
           return {
             ...nation,
-            imageUrl: `http://localhost:2025/api/nations/${nation.id}/image`,
+            imageUrl: `${baseURL}/api/nations/${nation.id}/image`,
             performanceByDate: grouped[nation.id]?.performanceByDate || {},
             fallbackImage: defaultImage,
             ...memberStat

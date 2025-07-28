@@ -15,7 +15,7 @@ import {
   Space,
   Grid,
 } from "antd";
-import axios from "axios";
+import axios from "../utils/axios";
 import UserContext from "../context/UserContext";
 
 const { Option } = Select;
@@ -86,7 +86,7 @@ const School = () => {
 
   const fetchSchools = async () => {
     try {
-      const res = await axios.get(`http://localhost:2025/api/schools/${user.address.id}`);
+      const res = await axios.get(`/api/schools/${user.address.id}`);
       const formatted = res.data.map((school, index) => ({
         key: index.toString(),
         id: school.id,
@@ -104,7 +104,7 @@ const School = () => {
 
   const fetchMentors = async () => {
     try {
-      const res = await axios.get(`http://localhost:2025/api/member/mentor/address/${user.address.id}`);
+      const res = await axios.get(`/api/member/mentor/address/${user.address.id}`);
       setMentors(res.data);
     } catch (err) {
       console.error("Failed to load mentors", err);
@@ -129,7 +129,7 @@ const School = () => {
       if (!item.id) return message.error("Missing school ID.");
       const updated = { ...item, ...row };
 
-      const response = await axios.put(`http://localhost:2025/api/schools/${item.id}`, {
+      const response = await axios.put(`/api/schools/${item.id}`, {
         schoolName: updated.name,
         schoolAddress: updated.address,
         personToContact: updated.personToContact,
@@ -163,7 +163,7 @@ const School = () => {
     };
 
     try {
-      await axios.post("http://localhost:2025/api/schools/register", payload);
+      await axios.post( `/api/schools/register`, payload);
       setIsModalOpen(false);
       schoolForm.resetFields();
       setShowSuccessAlert(true);
@@ -253,7 +253,7 @@ const School = () => {
  
 
       <Content style={{ 
-        padding: "24px",
+        padding: "40px",
         background: "#fff",
         maxWidth: "100vw",
         overflow: "hidden",

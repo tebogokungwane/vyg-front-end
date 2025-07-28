@@ -44,5 +44,5 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(2025, () => {
-  console.log("🚀 Server is running on http://localhost:2025");
+  console.log("🚀 Server is running on ${process.env.REACT_APP_API_BASE_URL}");
 });

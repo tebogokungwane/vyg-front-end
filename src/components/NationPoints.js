@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
 import { Table, Select, Card, Row, Col, message } from "antd";
 import { TrophyOutlined } from "@ant-design/icons";
-import axios from "axios";
+import axios from "../utils/axios";
 import UserContext from "../context/UserContext";
 
 const { Option } = Select;
@@ -25,7 +25,7 @@ const NationPoints = () => {
       }
 
       try {
-        const res = await axios.get(`http://localhost:2025/api/points/summary/address/${user.address.id}`);
+        const res = await axios.get(`/api/points/summary/address/${user.address.id}`);
         console.log("✅ API Response:", res.data); // ✅ Debugging log
 
         setData(res.data);

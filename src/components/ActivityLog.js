@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Card, Spin, Tag, Input, DatePicker, Select, notification } from 'antd';
-import { LoadingOutlined } from '@ant-design/icons';
-import axios from 'axios';
+import { Table, Card,  Tag, Input, DatePicker, Select, notification } from 'antd';
+import axios from "../utils/axios";
 import moment from 'moment';
 import { useAuth } from '../context/UserContext';
 import { useNavigate } from 'react-router-dom';
@@ -41,7 +40,7 @@ const ActivityLog = () => {
       const { current, pageSize } = pagination;
       const { username, action, dateRange, entityType } = filters;
       
-      const response = await axios.get('http://localhost:2025/api/audit/logs', {
+      const response = await axios.get(`/api/audit/logs`, {
         params: {
           page: current - 1,
           size: pageSize,
@@ -156,9 +155,8 @@ const ActivityLog = () => {
   };
 
   return (
-    <div className="activity-log-container">
+    <div className="activity-log-container"  style={{ paddingTop: "70px" }}>
       <Card
-        title="User Activity Log"
         variant="inner"
         className="activity-log-card"
       >

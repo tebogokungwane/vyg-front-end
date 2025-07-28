@@ -9,7 +9,7 @@ const ForgotPassword = () => {
 
   const onFinish = (values) => {
     setLoading(true);
-    fetch("http://localhost:2025/api/auth/forgot-password", {
+    fetch( `/api/auth/forgot-password`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

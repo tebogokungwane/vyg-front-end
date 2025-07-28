@@ -26,7 +26,7 @@ import {
   LockOutlined,
   EditOutlined,
 } from "@ant-design/icons";
-import axios from "axios";
+import axios from "../utils/axios";
 import UserContext from "../context/UserContext";
 import "../styles/profile.css";
 
@@ -68,10 +68,10 @@ const Profile = () => {
       try {
         setLoading(true);
         const [profileResponse, addressesResponse] = await Promise.all([
-          axios.get(`http://localhost:2025/api/member/${contextUser.id}`, {
+          axios.get(`/api/member/${contextUser.id}`, {
             headers: { Authorization: `Bearer ${contextUser.token}` }
           }),
-          axios.get("http://localhost:2025/api/addresses", {
+          axios.get( `/api/addresses`, {
             headers: { Authorization: `Bearer ${contextUser.token}` }
           })
         ]);
@@ -119,7 +119,7 @@ const Profile = () => {
 
     try {
       const response = await axios.put(
-        `http://localhost:2025/api/member/updateMember/${contextUser.id}`,
+        `/api/member/updateMember/${contextUser.id}`,
         payload,
         {
           headers: { Authorization: `Bearer ${contextUser.token}` }
@@ -146,7 +146,7 @@ const Profile = () => {
 
     try {
       const verifyResponse = await axios.post(
-        'http://localhost:2025/api/member/verifyPassword',
+        `/api/member/verifyPassword`,
         { memberId: contextUser.id, password: currentPassword },
         { headers: { Authorization: `Bearer ${contextUser.token}` } }
       );
@@ -170,7 +170,7 @@ const Profile = () => {
       }
 
       const updateResponse = await axios.put(
-        `http://localhost:2025/api/member/updatePassword/${contextUser.id}`,
+        `/api/member/updatePassword/${contextUser.id}`,
         { newPassword },
         { headers: { Authorization: `Bearer ${contextUser.token}` } }
       );

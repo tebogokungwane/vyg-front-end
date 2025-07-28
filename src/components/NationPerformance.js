@@ -8,7 +8,7 @@ import {
   message,
 } from "antd";
 import { TrophyTwoTone } from "@ant-design/icons";
-import axios from "../components/axios";
+import axios from "../utils/axios";
 import UserContext from "../context/UserContext";
 import defaultImage from "../images/vyg.jpg";
 import dayjs from "dayjs";
@@ -16,6 +16,8 @@ import isoWeek from "dayjs/plugin/isoWeek";
 dayjs.extend(isoWeek);
 
 const { Option } = Select;
+const baseURL = axios.defaults.baseURL;
+
 
 const NationPerformance = () => {
   const [nationsInfo, setNationsInfo] = useState([]);
@@ -50,15 +52,16 @@ const NationPerformance = () => {
           },
         });
 
-        const nationsRes = await axios.get("/api/nations");
+        const nationsRes = await axios.get(`/api/nations`);
 
         const enriched = res.data.map((stat) => {
           const match = nationsRes.data.find((n) => n.nation === stat.nation);
           return {
             ...stat,
             logo: match?.imageName
-              ? `http://localhost:2025/api/nations/${match.id}/image`
-              : defaultImage,
+            ? `${axios.defaults.baseURL}/api/nations/${match.id}/image`
+            : defaultImage,
+          
           };
         });
 

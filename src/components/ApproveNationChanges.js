@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Card, Button, Spin, message, Row, Col, Modal, Typography } from "antd";
-import axios from "axios";
+import axios from "../utils/axios";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 
 const { confirm } = Modal;
@@ -35,7 +35,7 @@ const ApproveNationChanges = ({ approverName, addressId }) => {
       content: "Are you sure you want to approve this change?",
       onOk: async () => {
         try {
-          await axios.put(`http://localhost:2025/api/nation-requests/approve/${requestId}`, null, {
+          await axios.put(`/api/nation-requests/approve/${requestId}`, null, {
             params: { approverName },
           });
           message.success("Nation request approved!");
@@ -54,7 +54,7 @@ const ApproveNationChanges = ({ approverName, addressId }) => {
       content: "Are you sure you want to reject this change?",
       onOk: async () => {
         try {
-          await axios.put(`http://localhost:2025/api/nation-requests/reject/${requestId}`, null, {
+          await axios.put(`/api/nation-requests/reject/${requestId}`, null, {
             params: { approverName },
           });
           message.success("Nation request rejected.");
@@ -78,7 +78,7 @@ const ApproveNationChanges = ({ approverName, addressId }) => {
                 cover={
                   <img
                     alt={req.nationName}
-                    src={`http://localhost:2025/api/nations/image/${req.nationId}`}
+                    src={`/api/nations/image/${req.nationId}`}
                     onError={(e) => (e.target.src = "/default-image.jpg")}
                     style={{ height: 200, objectFit: "cover" }}
                   />

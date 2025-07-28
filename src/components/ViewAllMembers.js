@@ -12,7 +12,7 @@ import {
   Space,
   Modal,
 } from "antd";
-import axios from "axios";
+import axios from "../utils/axios";
 import UserContext from "../context/UserContext";
 
 const { Option } = Select;
@@ -107,9 +107,9 @@ const ViewAllMembers = () => {
       try {
         setLoading(true);
         const [mentorsRes, nationsRes, membersRes] = await Promise.all([
-          axios.get(`http://localhost:2025/api/member/mentor/address/${user.address.id}`),
-          axios.get("http://localhost:2025/api/nations"),
-          axios.get(`http://localhost:2025/api/member/all-saved-members/address/${user.address.id}`),
+          axios.get(`/api/member/mentor/address/${user.address.id}`),
+          axios.get( `/api/nations`),
+          axios.get(`/api/member/all-saved-members/address/${user.address.id}`),
         ]);
 
         setMentors(mentorsRes.data);
@@ -211,7 +211,7 @@ const ViewAllMembers = () => {
       };
 
       // Update member data
-      await axios.put(`http://localhost:2025/api/member/updateMember/${key}`, payload);
+      await axios.put(`/api/member/updateMember/${key}`, payload);
 
       // Handle role change and email notification
       if (roleChanged && isElevatedRole) {
@@ -219,14 +219,14 @@ const ViewAllMembers = () => {
           const newPassword = Math.random().toString(36).slice(-8);
           
           // Send email notification
-          await axios.post("http://localhost:2025/api/member/send-email", {
+          await axios.post( `/api/member/send-email`, {
             email: oldUser.email,
             subject: "Your VYG Role Has Been Updated",
             message: `Dear ${row.name}" " ${row.surname},\n\nYour role has been updated to ${row.role}.\n\nYour new login details are:\nUsername: ${oldUser.email}\nPassword: ${newPassword}\n\nPlease change your password after logging in.`,
           });
 
           // Update password in backend
-          await axios.put(`http://localhost:2025/api/member/update-password/${key}`, {
+          await axios.put(`/api/member/update-password/${key}`, {
             newPassword: newPassword
           });
 

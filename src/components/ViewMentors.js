@@ -22,7 +22,7 @@ import {
   SearchOutlined,
   EditOutlined,
 } from '@ant-design/icons';
-import axios from 'axios';
+import axios from '../utils/axios';
 import UserContext from '../context/UserContext';
 const { Title } = Typography;
 const { Option } = Select;
@@ -51,7 +51,7 @@ const ViewMembersAssignMentor = () => {
   const fetchMentors = async (page = 1, size = 5) => {
     try {
       const response = await axios.get(
-        `http://localhost:2025/api/member/mentor/with-mentees/address/${user.address.id}`,
+        `/api/member/mentor/with-mentees/address/${user.address.id}`,
         { params: { page: page - 1, size } }
       );
       const { content, totalElements } = response.data;
@@ -77,7 +77,7 @@ const ViewMembersAssignMentor = () => {
   const fetchAllMentors = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:2025/api/member/mentor/address/${user.address.id}`
+        `/api/member/mentor/address/${user.address.id}`
       );
       setAllMentors(res.data);
     } catch (error) {
@@ -88,7 +88,7 @@ const ViewMembersAssignMentor = () => {
   const fetchUnassigned = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:2025/api/member/unassigned/${user.address.id}`
+        `/api/member/unassigned/${user.address.id}`
       );
       const formatted = res.data.map((mentee) => ({
         key: mentee.id,
@@ -114,7 +114,7 @@ const ViewMembersAssignMentor = () => {
     if (!selectedMentorId || !selectedMentee) return;
     try {
       await axios.patch(
-        `http://localhost:2025/api/member/${selectedMentee.id}/assign-mentor`,
+        `/api/member/${selectedMentee.id}/assign-mentor`,
         { mentorId: selectedMentorId }
       );
       message.success('Mentor assigned successfully!');
@@ -198,7 +198,7 @@ const ViewMembersAssignMentor = () => {
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
-      <div style={{ flexShrink: 0, background: '#fff', padding: '16px 24px', borderBottom: '1px solid #f0f0f0' }}>
+      <div style={{ flexShrink: 0, background: '#fff', padding: '40px 24px', borderBottom: '1px solid #f0f0f0' }}>
         <Title level={4}>Mentor & Mentee Management</Title>
         <Input
           placeholder="Search mentor by name..."

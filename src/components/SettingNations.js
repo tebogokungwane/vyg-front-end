@@ -17,9 +17,10 @@ import {
   PlusOutlined,
   ExclamationCircleOutlined,
 } from "@ant-design/icons";
-import axios from "axios";
+import axios from "../utils/axios";
 import defaultImage from "../images/vyg.jpg";
 import "../styles/SettingNations.css";
+const baseURL = axios.defaults.baseURL;
 
 const { confirm } = Modal;
 
@@ -39,7 +40,7 @@ const SettingNations = () => {
   const fetchNations = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("http://localhost:2025/api/nations");
+      const res = await axios.get( `/api/nations`);
       setNations(res.data);
     } catch (err) {
       message.error("Failed to fetch nations.");
@@ -59,7 +60,7 @@ const SettingNations = () => {
     
     try {
       await axios.put(
-        `http://localhost:2025/api/nations/${id}/name`,
+        `/api/nations/${id}/name`,
         { nation: name },
         {
           headers: {
@@ -84,7 +85,7 @@ const SettingNations = () => {
 
     try {
       setUploadingId(nation.id);
-      await axios.put(`http://localhost:2025/api/nations/${nation.id}`, formData, {
+      await axios.put(`/api/nations/${nation.id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
@@ -120,7 +121,7 @@ const SettingNations = () => {
 
   const handleDelete = async (nationId) => {
     try {
-      await axios.delete(`http://localhost:2025/api/nations/${nationId}`);
+      await axios.delete(`/api/nations/${nationId}`);
       setNations(nations.filter((n) => n.id !== nationId));
       message.success(`Deleted nation with ID: ${nationId}`);
     } catch (err) {
@@ -140,7 +141,7 @@ const SettingNations = () => {
 
     try {
       setCreating(true);
-      await axios.post("http://localhost:2025/api/nations", formData, {
+      await axios.post( `/api/nations`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
@@ -239,7 +240,9 @@ const SettingNations = () => {
                   cover={
                     <img
                       alt={nation.nation}
-                      src={`http://localhost:2025/api/nations/${nation.id}/image`}
+                      // src={`${'baseURL'}/api/nations/${nation.id}/image`}
+                      src={`${baseURL}/api/nations/${nation.id}/image`}
+
                       onError={(e) => (e.target.src = defaultImage)}
                       style={{ height: 200, objectFit: "cover", width: "100%" }}
                     />

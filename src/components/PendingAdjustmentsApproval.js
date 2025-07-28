@@ -12,7 +12,7 @@ import {
   Empty,
   Tag
 } from 'antd';
-import axios from 'axios';
+import axios from '../utils/axios';
 import UserContext from '../context/UserContext';
 
 const { Title } = Typography;
@@ -31,7 +31,7 @@ const PendingAdjustmentsApproval = () => {
     try {
       setLoading(true);
       const res = await axios.get(
-        `http://localhost:2025/api/manual-adjustment/pending/${user.address.id}`,
+        `/api/manual-adjustment/pending/${user.address.id}`,
         {
           headers: {
             Authorization: `Bearer ${user?.token}`,
@@ -55,7 +55,7 @@ const PendingAdjustmentsApproval = () => {
     try {
       setApproving(true);
       await axios.put(
-        `http://localhost:2025/api/manual-adjustment/approve/${record.id}`,
+        `/api/manual-adjustment/approve/${record.id}`,
         null,
         {
           params: { approvedBy: `${user.name} ${user.surname}` },
@@ -80,7 +80,7 @@ const PendingAdjustmentsApproval = () => {
   const handleReject = async (record) => {
     try {
       await axios.delete(
-        `http://localhost:2025/api/manual-adjustment/reject/${record.id}`,
+        `/api/manual-adjustment/reject/${record.id}`,
         {
           headers: {
             Authorization: `Bearer ${user?.token}`
@@ -153,7 +153,7 @@ const PendingAdjustmentsApproval = () => {
   ];
 
   return (
-    <div style={{ padding: '20px 16px', maxWidth: '100%', boxSizing: 'border-box' }}>
+    <div style={{ padding: '50px 16px', maxWidth: '100%', boxSizing: 'border-box' }}>
 
       {/* ✅ Only this container scrolls left/right */}
       <div style={{ overflowX: 'auto', width: '100%' }}>
