@@ -1,31 +1,23 @@
+// axiosConfig.js
 import axios from 'axios';
 
-const instance = axios.create({
-  // baseURL: process.env.REACT_APP_API_BASE_URL || 'http://localhost:2025',
-  baseURL: process.env.REACT_APP_API_BASE_URL,
-
-  withCredentials: true
+const api = axios.create({
+  baseURL: 'https://vyg-rpth.onrender.com',
+  withCredentials: true,
+  headers: {
+    'Content-Type': 'application/json'
+  }
 });
 
-instance.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      config.headers["Authorization"] = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
-instance.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 403) {
-      console.warn("403 Forbidden error");
+// Add response interceptor
+api.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.code === 'ERR_NETWORK') {
+      console.error('Network error - check CORS or backend availability');
     }
     return Promise.reject(error);
   }
 );
 
-export default instance;
+export default api;
