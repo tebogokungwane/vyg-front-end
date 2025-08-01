@@ -3,19 +3,24 @@ import axios from 'axios';
 
 const api = axios.create({
   baseURL: 'https://vyg-rpth.onrender.com',
-  withCredentials: true,
+  withCredentials: true, // needed if backend uses cookies or sessions
   headers: {
     'Content-Type': 'application/json'
   }
 });
 
-// Add response interceptor
+// 🔁 Intercept responses to handle global errors
 api.interceptors.response.use(
   response => response,
   error => {
     if (error.code === 'ERR_NETWORK') {
-      console.error('Network error - check CORS or backend availability');
+      console.error('🌐 Network error - check if backend is running and CORS is allowed');
+    } else if (error.response) {
+      console.error(`🚫 API Error [${error.response.status}]:`, error.response.data);
+    } else {
+      console.error('❗ Unexpected error:', error.message || error);
     }
+
     return Promise.reject(error);
   }
 );
