@@ -9,10 +9,12 @@ import {
 import { Select, Card, Row, Col, message, Radio, Tabs, Space } from "antd";
 import axios from "../utils/axios";
 import UserContext from "../context/UserContext";
+import dayjs from "dayjs";
+import isoWeek from "dayjs/plugin/isoWeek";
+dayjs.extend(isoWeek);
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 const { Option } = Select;
-const { TabPane } = Tabs;
 
 const NationPerformancePieChart = () => {
   const [data, setData] = useState([]);
@@ -34,13 +36,32 @@ const NationPerformancePieChart = () => {
 
       try {
         const res = await axios.get(`/api/points/summary/address/${user.address.id}`);
-        setData(res.data);
+        console.log("🥧 Pie Chart API response:", res.data);
+        
+        // Transform data to add weekNumber, month, year from dateCaptured
+        const transformed = res.data.map(item => {
+          const date = dayjs(item.dateCaptured);
+          return {
+            ...item,
+            weekNumber: date.isoWeek(),
+            month: date.month() + 1,
+            year: date.year(),
+            totalPointsEarnedPerWeek: item.points * item.numberOfPeople || item.totalPoints || item.points || 0,
+            nation: item.nation || {},
+          };
+        });
+        
+        setData(transformed);
         setLoading(false);
 
-        if (res.data.length > 0) {
-          setSelectedWeek(Math.max(...new Set(res.data.map(item => item.weekNumber))));
-          setSelectedMonth(Math.max(...new Set(res.data.map(item => item.month))));
-          setSelectedYear(Math.max(...new Set(res.data.map(item => item.year))));
+        if (transformed.length > 0) {
+          const weeks = [...new Set(transformed.map(item => item.weekNumber))].filter(v => v != null && !isNaN(v));
+          const months = [...new Set(transformed.map(item => item.month))].filter(v => v != null && !isNaN(v));
+          const years = [...new Set(transformed.map(item => item.year))].filter(v => v != null && !isNaN(v));
+          
+          if (weeks.length > 0) setSelectedWeek(Math.max(...weeks));
+          if (months.length > 0) setSelectedMonth(Math.max(...months));
+          if (years.length > 0) setSelectedYear(Math.max(...years));
         }
       } catch (err) {
         console.error("Error fetching nation points:", err);
@@ -52,9 +73,9 @@ const NationPerformancePieChart = () => {
     fetchNationPoints();
   }, [user]);
 
-  const uniqueWeeks = [...new Set(data.map((item) => item.weekNumber))].sort((a, b) => b - a);
-  const uniqueMonths = [...new Set(data.map((item) => item.month))].sort((a, b) => b - a);
-  const uniqueYears = [...new Set(data.map((item) => item.year))].sort((a, b) => b - a);
+  const uniqueWeeks = [...new Set(data.map((item) => item.weekNumber))].filter(v => v != null && !isNaN(v)).sort((a, b) => b - a);
+  const uniqueMonths = [...new Set(data.map((item) => item.month))].filter(v => v != null && !isNaN(v)).sort((a, b) => b - a);
+  const uniqueYears = [...new Set(data.map((item) => item.year))].filter(v => v != null && !isNaN(v)).sort((a, b) => b - a);
 
   const prepareChartData = (timePeriod) => {
     let filtered = [...data];
@@ -74,12 +95,12 @@ const NationPerformancePieChart = () => {
     const nationData = {};
     
     filtered.forEach((item) => {
-      const nation = item.nation.nation;
+      const nation = item.nation?.nation || "Unknown";
       if (!nationData[nation]) {
         nationData[nation] = { points: 0, people: 0 };
       }
-      nationData[nation].points += item.totalPointsEarnedPerWeek;
-      nationData[nation].people += item.numberOfPeople;
+      nationData[nation].points += item.totalPointsEarnedPerWeek || item.points || 0;
+      nationData[nation].people += item.numberOfPeople || 0;
     });
 
     const labels = Object.keys(nationData);
@@ -164,9 +185,10 @@ const NationPerformancePieChart = () => {
             onChange={setSelectedWeek}
             style={{ width: 150 }}
             size="large"
+            placeholder="Select week"
           >
             {uniqueWeeks.map((week) => (
-              <Option key={week} value={week}>
+              <Option key={`week-${week}`} value={week}>
                 Week {week}
               </Option>
             ))}
@@ -179,9 +201,10 @@ const NationPerformancePieChart = () => {
             onChange={setSelectedMonth}
             style={{ width: 150 }}
             size="large"
+            placeholder="Select month"
           >
             {uniqueMonths.map((month) => (
-              <Option key={month} value={month}>
+              <Option key={`month-${month}`} value={month}>
                 Month {month}
               </Option>
             ))}
@@ -194,9 +217,10 @@ const NationPerformancePieChart = () => {
             onChange={setSelectedYear}
             style={{ width: 150 }}
             size="large"
+            placeholder="Select year"
           >
             {uniqueYears.map((year) => (
-              <Option key={year} value={year}>
+              <Option key={`year-${year}`} value={year}>
                 {year}
               </Option>
             ))}
@@ -243,29 +267,32 @@ const NationPerformancePieChart = () => {
           fontSize: '16px'
         }}
         tabBarStyle={{ fontWeight: '500' }}
-      >
-        <TabPane tab="Weekly View" key="weekly" />
-        <TabPane tab="Monthly View" key="monthly" />
-        <TabPane tab="Yearly View" key="yearly" />
-      </Tabs>
+        items={[
+          { key: "weekly", label: "Weekly View" },
+          { key: "monthly", label: "Monthly View" },
+          { key: "yearly", label: "Yearly View" },
+        ]}
+      />
 
       <Row justify="center" style={{ marginBottom: '24px' }}>
         {renderTimeSelector()}
       </Row>
 
       <Card 
-        bordered={false}
+        variant="borderless"
         style={{ 
           height: '70vh',
           minHeight: '600px',
           boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
           borderRadius: '12px'
         }}
-        bodyStyle={{ 
-          padding: '24px',
-          height: '100%',
-          display: 'flex',
-          flexDirection: 'column'
+        styles={{
+          body: {
+            padding: '24px',
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column'
+          }
         }}
       >
         {data.length > 0 ? (

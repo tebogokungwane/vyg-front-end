@@ -89,9 +89,10 @@ const SettingNations = () => {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
+      // Force refresh the image by appending a cache-busting timestamp
       const updated = [...nations];
-      updated[index].imageUrl = URL.createObjectURL(file);
-      updated[index].file = file;
+      updated[index].imageTimestamp = Date.now();
+      updated[index].imageName = "uploaded"; // Mark as having an image
       setNations(updated);
 
       message.success("Image updated successfully!");
@@ -240,9 +241,9 @@ const SettingNations = () => {
                   cover={
                     <img
                       alt={nation.nation}
-                      // src={`${'baseURL'}/api/nations/${nation.id}/image`}
-                      src={`${baseURL}/api/nations/${nation.id}/image`}
-
+                      src={nation.imageName
+                        ? `${baseURL}/api/nations/${nation.id}/image?t=${nation.imageTimestamp || ''}`
+                        : defaultImage}
                       onError={(e) => (e.target.src = defaultImage)}
                       style={{ height: 200, objectFit: "cover", width: "100%" }}
                     />

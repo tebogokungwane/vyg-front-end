@@ -2,8 +2,8 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://vyg-rpth.onrender.com',
-  withCredentials: true, // needed if backend uses cookies or sessions
+  baseURL: process.env.REACT_APP_API_BASE_URL,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json'
   }

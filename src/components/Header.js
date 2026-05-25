@@ -1,13 +1,33 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Button } from "antd";
 import { MenuUnfoldOutlined } from "@ant-design/icons";
-import profileImage from "../images/vyg.jpg";
+import fallbackImage from "../images/vyg.jpg";
 import UserContext from "../context/UserContext";
 import "../styles/Header.css";
+
+const LOGO_URL = `${process.env.REACT_APP_API_BASE_URL}/api/branding/logo`;
 
 const Header = ({ toggleSidebar, pageTitle, pageIcon }) => {
   const { user } = useContext(UserContext);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [logoSrc, setLogoSrc] = useState(fallbackImage);
+
+  useEffect(() => {
+    // Fetch logo from the database via the branding API
+    const img = new Image();
+    img.src = `${LOGO_URL}?t=${Date.now()}`;
+    img.onload = () => setLogoSrc(img.src);
+    img.onerror = () => setLogoSrc(fallbackImage); // fallback if no logo in DB yet
+  }, []);
+
+  // Listen for custom event dispatched when logo is uploaded
+  useEffect(() => {
+    const handleLogoUpdate = () => {
+      setLogoSrc(`${LOGO_URL}?t=${Date.now()}`);
+    };
+    window.addEventListener("logo-updated", handleLogoUpdate);
+    return () => window.removeEventListener("logo-updated", handleLogoUpdate);
+  }, []);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -19,7 +39,7 @@ const Header = ({ toggleSidebar, pageTitle, pageIcon }) => {
     <header className="header">
       <div className="header-left">
         {/* On large screens, show logo; on mobile, show hamburger menu */}
-        {!isMobile && <img src={profileImage} alt="Logo" className="logo" />}
+        {!isMobile && <img src={logoSrc} alt="Logo" className="logo" />}
         {isMobile && (
           <Button
             className="hamburger-menu"
@@ -47,7 +67,7 @@ const Header = ({ toggleSidebar, pageTitle, pageIcon }) => {
 
         {/* Small screen: Show logo on the right */}
         {isMobile && (
-          <img src={profileImage} alt="Logo" className="mobile-logo" />
+          <img src={logoSrc} alt="Logo" className="mobile-logo" />
         )}
       </div>
     </header>

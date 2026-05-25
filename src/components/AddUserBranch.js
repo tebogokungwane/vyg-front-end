@@ -9,7 +9,7 @@ const { Option } = Select;
 
 const AddUserBranch = () => {
   const [form] = Form.useForm();
-  const [ setNations] = useState([]);
+  const [nations, setNations] = useState([]);
   const [churches, setChurches] = useState([]);
   const [role, setRole] = useState("MENTOR");
   const [loading, setLoading] = useState(false);
@@ -20,14 +20,37 @@ const AddUserBranch = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
+        const token = localStorage.getItem("token");
+        console.log("🔑 Token found:", token ? "Yes" : "No");
+        console.log("🔑 Token value:", token ? token.substring(0, 20) + "..." : "null");
+
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        console.log("📡 Fetching /api/addresses with headers:", headers);
+
         const [nationsRes, churchesRes] = await Promise.all([
-          axios.get(`/api/nations`),
-          axios.get(`/api/addresses`)
+          axios.get(`/api/nations`, { headers }),
+          axios.get(`/api/addresses`, { headers })
         ]);
+
+        console.log("✅ Nations response:", nationsRes.data);
+        console.log("✅ Addresses response:", churchesRes.data);
+        console.log("✅ Number of churches loaded:", churchesRes.data?.length);
+
         setNations(nationsRes.data);
         setChurches(churchesRes.data);
       } catch (error) {
-        message.error("Failed to load data");
+        console.error("❌ Fetch error:", error);
+        console.error("❌ Error status:", error.response?.status);
+        console.error("❌ Error data:", error.response?.data);
+        console.error("❌ Error headers sent:", error.config?.headers);
+
+        if (error.response?.status === 403) {
+          message.error("You don't have permission to access this page.");
+        } else if (error.response?.status === 401) {
+          message.error("Session expired. Please log in again.");
+        } else {
+          message.error("Failed to load data");
+        }
       } finally {
         setLoading(false);
       }
@@ -53,10 +76,15 @@ const AddUserBranch = () => {
         role: values.role,
         password: "VYG@123",
         isActive: true,
-        createBy: `${user?.name} ${user?.surname}`,
+        createdBy: `${user?.name} ${user?.surname}`,
+        capturedBy: `${user?.name} ${user?.surname}`,
       };
 
-      const response = await axios.post(`/api/member/register`, payload);
+      const response = await axios.post(`/api/member/register`, payload, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
       message.success(`🎉 ${response.data.name} ${response.data.surname} registered successfully!`);
       form.resetFields();
     } catch (error) {

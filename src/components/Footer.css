@@ -28,13 +28,20 @@
     margin-bottom: 10px;
   }
   
+  .social-link-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+  }
+
+  .social-link-item:hover {
+    transform: translateY(-2px);
+  }
+
   .social-icon {
     font-size: 22px;
     transition: all 0.2s ease;
-  }
-  
-  .social-icon:hover {
-    transform: translateY(-2px);
   }
   
   .facebook { color: #1877f2; }
@@ -53,4 +60,28 @@
   /* Ensure main content doesn't hide behind footer */
   .main-content {
     padding-bottom: 80px; /* Adjust based on footer height */
+  }
+
+  /* Small screen: footer moves to top */
+  @media (max-width: 768px) {
+    .app-footer {
+      top: 0;
+      bottom: auto;
+      border-top: none;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      padding: 10px 0;
+    }
+
+    .social-links {
+      margin-bottom: 5px;
+    }
+
+    .social-icon {
+      font-size: 18px;
+    }
+
+    .copyright {
+      font-size: 11px;
+    }
   }

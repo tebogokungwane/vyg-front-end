@@ -104,12 +104,42 @@ const ManageNations = () => {
   ];
 
   return (
-    <div style={{ padding: 30 }}>
-      <h2>🇿🇦 Manage Nations</h2>
-      <Button type="primary" onClick={() => openModal()} icon={<PlusOutlined />} style={{ marginBottom: 16 }}>
-        Add Nation
-      </Button>
-      <Table rowKey="id" dataSource={nations} columns={columns} loading={loading} />
+    <div style={{ padding: 20, maxWidth: 900, margin: "0 auto" }}>
+      {/* Button bar - always visible */}
+      <div
+        style={{
+          position: "sticky",
+          top: 80,
+          zIndex: 99,
+          background: "#fff",
+          padding: "12px 0",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: 12,
+          borderBottom: "1px solid #f0f0f0",
+          marginBottom: 16,
+        }}
+      >
+        <h2 style={{ margin: 0, fontSize: 18 }}>🇿🇦 Manage Nations</h2>
+        <Button
+          type="primary"
+          onClick={() => openModal()}
+          icon={<PlusOutlined />}
+          size="large"
+        >
+          Add Nation
+        </Button>
+      </div>
+
+      <Table
+        rowKey="id"
+        dataSource={nations}
+        columns={columns}
+        loading={loading}
+        scroll={{ x: true }}
+      />
 
       <Modal
         open={modalVisible}
@@ -132,7 +162,7 @@ const ManageNations = () => {
             </Upload>
           </Form.Item>
         </Form>
-      </Modal>5
+      </Modal>
     </div>
   );
 };

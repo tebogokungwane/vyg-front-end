@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Menu } from "antd";
+import React, { useState, useEffect, useContext } from "react";
+import { Menu, Button } from "antd";
 import { useNavigate } from "react-router-dom";
 import {
   HomeOutlined,
@@ -17,7 +17,10 @@ import {
   ProfileOutlined,
   AppstoreOutlined,
   DatabaseOutlined,
+  PictureOutlined,
+  LogoutOutlined,
 } from "@ant-design/icons";
+import UserContext from "../context/UserContext";
 import "../styles/Sidebar.css";
 
 const Sidebar = ({ isSidebarOpen, toggleSidebar, setPageTitle, setPageIcon, user }) => {
@@ -25,73 +28,81 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, setPageTitle, setPageIcon, user
   const [openKeys, setOpenKeys] = useState([]);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const navigate = useNavigate();
+  const { setUser } = useContext(UserContext);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setUser(null);
+    navigate("/");
+  };
 
   useEffect(() => {
-
-    console.log("🧾 Sidebar: Rendering menu for user role:", user?.role);
-
-
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const rootSubmenuKeys = ["points", "charts", "member", "settings"];
+  const rootSubmenuKeys = ["points", "charts", "member", "settings", "upload-images"];
 
   const allMenuItems = [
-    { key: "dashboard", icon: <HomeOutlined />, label: "Dashboard" },
+    { key: "dashboard", icon: <HomeOutlined style={{ color: "#1890ff" }} />, label: "Dashboard" },
     {
       key: "points",
-      icon: <StarOutlined />,
+      icon: <StarOutlined style={{ color: "#faad14" }} />,
       label: "Points",
       children: [
-        { key: "capture-points", icon: <StarOutlined />, label: "Capture Points" },
-        { key: "add-subtract", icon: <EnvironmentOutlined />, label: "Add or Subtract Points" },
-        { key: "pending-approvals", icon: <ClockCircleOutlined />, label: "Pending Points Approval" },
-        { key: "pending-adjustment-approvals", icon: <ClockCircleOutlined />, label: "Adjustment Approval" },
+        { key: "capture-points", icon: <StarOutlined style={{ color: "#faad14" }} />, label: "Capture Points" },
+        { key: "add-subtract", icon: <EnvironmentOutlined style={{ color: "#eb2f96" }} />, label: "Add or Subtract Points" },
+        { key: "pending-approvals", icon: <ClockCircleOutlined style={{ color: "#fa8c16" }} />, label: "Pending Points Approval" },
+        { key: "pending-adjustment-approvals", icon: <ClockCircleOutlined style={{ color: "#fa541c" }} />, label: "Adjustment Approval" },
       ],
     },
-    { key: "nation-points", icon: <AppstoreOutlined />, label: "Nations Standings" },
-    { key: "nation-performance-overview", icon: <LineChartOutlined />, label: "Performance Overview" },
+    { key: "nation-points", icon: <AppstoreOutlined style={{ color: "#722ed1" }} />, label: "Nations Standings" },
+    { key: "nation-performance-overview", icon: <LineChartOutlined style={{ color: "#13c2c2" }} />, label: "Performance Overview" },
     {
       key: "charts",
-      icon: <BarChartOutlined />,
+      icon: <BarChartOutlined style={{ color: "#52c41a" }} />,
       label: "Charts",
       children: [
-        { key: "pie-chart", icon: <PieChartOutlined />, label: "Pie Chart" },
-        { key: "bar-chart", icon: <BarChartOutlined />, label: "Bar Chart" },
-        { key: "line-chart", icon: <LineChartOutlined />, label: "Line Chart" },
+        { key: "pie-chart", icon: <PieChartOutlined style={{ color: "#eb2f96" }} />, label: "Pie Chart" },
+        { key: "bar-chart", icon: <BarChartOutlined style={{ color: "#52c41a" }} />, label: "Bar Chart" },
+        { key: "line-chart", icon: <LineChartOutlined style={{ color: "#1890ff" }} />, label: "Line Chart" },
       ],
     },
     {
       key: "member",
-      icon: <TeamOutlined />,
+      icon: <TeamOutlined style={{ color: "#2f54eb" }} />,
       label: "Member",
       children: [
-        { key: "add-mentor", icon: <TeamOutlined />, label: "Add User" },
-        { key: "view-all-members", icon: <EyeOutlined />, label: "View All Member" },
-        { key: "view-mentors", icon: <EyeOutlined />, label: "View Mentors" },
-        // { key: "assign-roles-nations", icon: <TeamOutlined />, label: "Assign Roles & Nations" },
+        { key: "add-mentor", icon: <TeamOutlined style={{ color: "#2f54eb" }} />, label: "Add User" },
+        { key: "view-all-members", icon: <EyeOutlined style={{ color: "#13c2c2" }} />, label: "View All Member" },
+        { key: "view-mentors", icon: <EyeOutlined style={{ color: "#722ed1" }} />, label: "View Mentors" },
       ],
     },
-    { key: "school", icon: <BookOutlined />, label: "School" },
-    { key: "profile", icon: <ProfileOutlined />, label: "Profile" },
+    { key: "school", icon: <BookOutlined style={{ color: "#fa8c16" }} />, label: "School" },
+    { key: "profile", icon: <ProfileOutlined style={{ color: "#597ef7" }} />, label: "Profile" },
     {
       key: "settings",
-      icon: <SettingOutlined />,
+      icon: <SettingOutlined style={{ color: "#595959" }} />,
       label: "Settings",
       children: [
-        { key: "add-user-branch", icon: <UserOutlined />, label: "Add User for branch" },
-        { key: "event-management", icon: <StarOutlined />, label: "Event Management" },
-        { key: "management-church-address", icon: <EnvironmentOutlined />, label: "Manage Church Address" },
-        { key: "setting-nations", icon: <AppstoreOutlined />, label: "Manage Nation" },
-        { key: "active-logs", icon: <DatabaseOutlined />, label: "Active Logs" }
-
-
-
-        // { key: "approve-nation-changes", icon: <ClockCircleOutlined />, label: "Approve Nation" },
-
-        // { key: "approvals", icon: <ClockCircleOutlined />, label: "Pending approval" },
+        { key: "add-user-branch", icon: <UserOutlined style={{ color: "#1890ff" }} />, label: "Add User for branch" },
+        { key: "event-management", icon: <StarOutlined style={{ color: "#faad14" }} />, label: "Event Management" },
+        { key: "management-church-address", icon: <EnvironmentOutlined style={{ color: "#52c41a" }} />, label: "Manage Church Address" },
+        { key: "setting-nations", icon: <AppstoreOutlined style={{ color: "#722ed1" }} />, label: "Manage Nation" },
+        { key: "active-logs", icon: <DatabaseOutlined style={{ color: "#13c2c2" }} />, label: "Active Logs" },
+      ],
+    },
+    {
+      key: "upload-images",
+      icon: <PictureOutlined style={{ color: "#eb2f96" }} />,
+      label: "Upload Image",
+      children: [
+        { key: "upload-logo", icon: <PictureOutlined style={{ color: "#eb2f96" }} />, label: "Upload Logo" },
+        { key: "upload-favicon", icon: <PictureOutlined style={{ color: "#fa541c" }} />, label: "Upload Favicon" },
+        { key: "upload-background", icon: <PictureOutlined style={{ color: "#722ed1" }} />, label: "Upload Background" },
+        { key: "manage-social-media", icon: <AppstoreOutlined style={{ color: "#1890ff" }} />, label: "Social Media" },
+        { key: "theme-toggle", icon: <SettingOutlined style={{ color: "#595959" }} />, label: "Light / Dark Mode" },
       ],
     },
   ];
@@ -112,19 +123,15 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, setPageTitle, setPageIcon, user
 
   const getFilteredMenuItems = () => {
 
+    if (!user) return allMenuItems;
+
     if (user?.role?.toLowerCase() === "member") {
-  console.log("🔒 Filtering menu for MEMBER role");
-  return allMenuItems.filter(item =>
-    ["dashboard", "charts", "nation-points", "nation-performance-overview", "profile"].includes(item.key)
-  );
-}
+      return allMenuItems.filter(item =>
+        ["dashboard", "charts", "nation-points", "nation-performance-overview", "profile"].includes(item.key)
+      );
+    }
 
-  
-
-
-    console.log("🧾 Sidebar: Rendering menu for user role:", user.role);
-  
-    if (user.role === "member") {
+    if (user?.role === "member") {
       const allowedKeysForMember = [
         "dashboard",
         "charts",
@@ -155,11 +162,9 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, setPageTitle, setPageIcon, user
         })
         .filter(Boolean);
   
-      console.log("🎯 Filtered menu for 'member':", filtered.map(i => i.key));
       return filtered;
     }
   
-    console.log("✅ Showing full menu for role:", user.role);
     return allMenuItems;
   };
   
@@ -205,6 +210,28 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, setPageTitle, setPageIcon, user
           </div>
         </div>
       )}
+
+      <div className="sidebar-logout" onMouseDown={(e) => e.stopPropagation()}>
+        {user && (
+          <div style={{ padding: "0 12px 8px", fontSize: 13, color: "#595959" }}>
+            Logged in as: <strong>{user.name} {user.surname}</strong>
+          </div>
+        )}
+        <Button
+          type="text"
+          danger
+          icon={<LogoutOutlined />}
+          onMouseDown={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            handleLogout();
+          }}
+          block
+          style={{ textAlign: "left", height: 40 }}
+        >
+          Logout
+        </Button>
+      </div>
     </div>
   );
 };

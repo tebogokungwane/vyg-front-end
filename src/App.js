@@ -1,5 +1,6 @@
 import { Routes, Route, useLocation } from "react-router-dom";
 import { useState } from "react";
+import { message } from "antd";
 import UserContext from "./context/UserContext";
 import Dashboard from "./components/Dashboard";
 import AddMember from "./components/AddMember";
@@ -35,8 +36,15 @@ import AssignRolesAndNations from "./components/AssignRolesAndNations";
 import PendingAdjustmentsApproval from "./components/PendingAdjustmentsApproval";
 import ApproveNationChanges from "./components/ApproveNationChanges";
 import ActivityLog from "./components/ActivityLog";
+import UploadLogo from "./components/UploadLogo";
+import UploadFavicon from "./components/UploadFavicon";
+import UploadBackground from "./components/UploadBackground";
+import ThemeToggle from "./components/ThemeToggle";
+import ManageSocialMedia from "./components/ManageSocialMedia";
 
+import { useEffect } from "react";
 import "./App.css";
+import "./styles/theme.css";
 
 function App() {
   const location = useLocation();
@@ -50,6 +58,25 @@ function App() {
   const [isSidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 768);
 
   const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
+
+  // Apply saved theme on app load
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme") || "light";
+    if (savedTheme === "dark") {
+      document.body.classList.add("dark-theme");
+      document.body.classList.remove("light-theme");
+    } else {
+      document.body.classList.add("light-theme");
+      document.body.classList.remove("dark-theme");
+    }
+  }, []);
+
+  // Configure message to always appear at the top consistently
+  message.config({
+    top: 80,
+    duration: 3,
+    maxCount: 3,
+  });
 
   return (
     <UserContext.Provider value={{ user, setUser }}>
@@ -125,6 +152,11 @@ function App() {
                 <Route path="/pending-adjustment-approvals" element={<ProtectedRoute><PendingAdjustmentsApproval /></ProtectedRoute>} />
                 <Route path="/approve-nation-changes" element={<ProtectedRoute><ApproveNationChanges /></ProtectedRoute>} />
                 <Route path="/active-logs" element={<ProtectedRoute><ActivityLog /></ProtectedRoute>} />
+                <Route path="/upload-logo" element={<ProtectedRoute><UploadLogo /></ProtectedRoute>} />
+                <Route path="/upload-favicon" element={<ProtectedRoute><UploadFavicon /></ProtectedRoute>} />
+                <Route path="/upload-background" element={<ProtectedRoute><UploadBackground /></ProtectedRoute>} />
+                <Route path="/theme-toggle" element={<ProtectedRoute><ThemeToggle /></ProtectedRoute>} />
+                <Route path="/manage-social-media" element={<ProtectedRoute><ManageSocialMedia /></ProtectedRoute>} />
 
                 
 

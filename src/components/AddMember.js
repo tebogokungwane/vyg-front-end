@@ -39,10 +39,15 @@ const AddMember = () => {
         role: "MEMBER",
         password: "VYG@123",
         isActive: true,
-        createBy: `${user?.name} ${user?.surname}`,
+        createdBy: `${user?.name} ${user?.surname}`,
+        capturedBy: `${user?.name} ${user?.surname}`,
       };
 
-      const response = await axios.post( `/api/member/register`, payload);
+      const response = await axios.post( `/api/member/register`, payload, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
       message.success(`🎉 ${response.data.name} ${response.data.surname} registered successfully!`);
       setAlertInfo({ type: 'success', text: `${response.data.name} ${response.data.surname} registered successfully!` });
       form.resetFields();

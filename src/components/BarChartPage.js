@@ -13,6 +13,9 @@ import {
 import axios from "../utils/axios";
 import { Select, Row, Tabs, Radio, Card, message } from "antd";
 import UserContext from "../context/UserContext";
+import dayjs from "dayjs";
+import isoWeek from "dayjs/plugin/isoWeek";
+dayjs.extend(isoWeek);
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
@@ -43,16 +46,31 @@ const BarChartPage = () => {
 
       try {
         const res = await axios.get(
-          `/api/nation-stats/address/${user.address.id}`
+          `/api/points/summary/address/${user.address.id}`
         );
-        setData(res.data);
+        
+        // Transform data to add year/month from dateCaptured
+        const transformed = res.data.map(item => {
+          const date = dayjs(item.dateCaptured);
+          return {
+            ...item,
+            weekNumber: date.isoWeek(),
+            month: date.month() + 1,
+            year: date.year(),
+            totalPoints: item.points * item.numberOfPeople || item.totalPoints || item.points || 0,
+            totalMembers: item.numberOfPeople || 0,
+            nation: item.nation || {},
+          };
+        });
+        
+        setData(transformed);
 
-        const uniqueYears = [...new Set(res.data.map((item) => item.year))]
-          .filter((year) => year !== undefined && year !== null)
+        const uniqueYears = [...new Set(transformed.map((item) => item.year))]
+          .filter((year) => year !== undefined && year !== null && !isNaN(year))
           .sort((a, b) => b - a);
 
-        const uniqueMonths = [...new Set(res.data.map((item) => item.month))]
-          .filter((month) => month !== undefined && month !== null)
+        const uniqueMonths = [...new Set(transformed.map((item) => item.month))]
+          .filter((month) => month !== undefined && month !== null && !isNaN(month))
           .sort((a, b) => b - a);
 
         setYears(uniqueYears);
@@ -81,7 +99,7 @@ const BarChartPage = () => {
 
     const nationData = {};
     filtered.forEach((item) => {
-      const nation = item.nation?.nation || item.nation; // handle both object and string
+      const nation = item.nation?.nation || "Unknown";
       if (!nation) return;
 
       if (!nationData[nation]) {
@@ -89,7 +107,7 @@ const BarChartPage = () => {
       }
 
       nationData[nation].points += item.totalPoints || 0;
-      nationData[nation].people += item.totalMembers || 0;
+      nationData[nation].people += item.totalMembers || item.numberOfPeople || 0;
     });
 
     const labels = Object.keys(nationData);

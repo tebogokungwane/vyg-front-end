@@ -90,7 +90,7 @@ const ViewMembersAssignMentor = () => {
       const res = await axios.get(
         `/api/member/unassigned/${user.address.id}`
       );
-      const formatted = res.data.map((mentee) => ({
+      const formatted = (res.data || []).map((mentee) => ({
         key: mentee.id,
         ...mentee,
         nationName: mentee.nation?.nation || 'N/A',
@@ -98,7 +98,9 @@ const ViewMembersAssignMentor = () => {
       setUnassigned(formatted);
     } catch (error) {
       console.error('❌ Failed to load unassigned mentees:', error);
-      message.error('Failed to load unassigned mentees.');
+      // Don't show error toast for this — backend has members with null nation
+      // This is a backend data issue, page should still load
+      setUnassigned([]);
     }
   };
 

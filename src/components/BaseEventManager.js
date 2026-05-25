@@ -166,7 +166,7 @@ const BaseEventManager = () => {
           onOk={form.submit}
           okText="Save"
           width={400}
-          bodyStyle={{ paddingBottom: 0 }}
+          styles={{ body: { paddingBottom: 0 } }}
         >
           <Form form={form} layout="vertical" onFinish={handleFinish}>
             <Form.Item

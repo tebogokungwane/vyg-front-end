@@ -44,17 +44,22 @@ const AddMentor = () => {
         gender: values.gender.toUpperCase(),
         cellNumber: values.phone,
         residentialAddress: role !== "PR" ? values.residentialAddress : null,
-        addressId: role !== "PR" ? user?.address?.id : null,
+        addressId: user?.address?.id,
         role: values.role,
         nation: role === "MENTOR"
           ? { id: values.nationId, nation: values.nationName?.toUpperCase() }
           : null,
         password: "VYG@123",
         isActive: true,
-        createBy: `${user?.name} ${user?.surname}`,
+        createdBy: `${user?.name} ${user?.surname}`,
+        capturedBy: `${user?.name} ${user?.surname}`,
       };
 
-      const response = await axios.post( `/api/member/register`, payload);
+      const response = await axios.post( `/api/member/register`, payload, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
 
       setAlertInfo({
         text: `🎉 ${response.data.name} ${response.data.surname} has been successfully registered!`,

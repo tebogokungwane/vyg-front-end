@@ -54,37 +54,47 @@ const Dashboard = () => {
   }, []);
 
   // Fetch stats - now properly handles undefined addressId
-  useEffect(() => {
-    const fetchStats = async () => {
-      setLoading(true);
-      setError(null);
-      
-      try {
-        // Use hardcoded addressId if user.address.id is not available
-        const addressId = user?.address?.id;
-        console.log("Using addressId:", addressId);
+useEffect(() => {
+  const fetchStats = async () => {
+    const addressId = user?.address?.id;
 
-        const response = await axios.get(`/api/dashboard/summary?addressId=${addressId}`);
-        
-        console.log("API Response Data:", response.data);
-        setStats(response.data);
-      } catch (err) {
-        console.error("API Error Details:", {
-          message: err.message,
-          response: err.response?.data,
-          status: err.response?.status
-        });
-        setError(err.response?.data?.message || err.message || "Failed to load dashboard data");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    // Only fetch if user context is loaded
-    if (user !== null) {
-      fetchStats();
+    if (!addressId) {
+      console.warn("addressId is undefined, skipping API call");
+      return;
     }
-  }, [user]);
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await axios.get(
+        `/api/dashboard/summary?addressId=${addressId}`
+      );
+
+      console.log("API Response Data:", response.data);
+      setStats(response.data);
+
+    } catch (err) {
+      console.error("API Error Details:", {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status
+      });
+
+      setError(
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to load dashboard data"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchStats();
+}, [user?.address?.id]);
+  
+  
 
   if (loading) {
     return (

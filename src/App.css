@@ -5,17 +5,17 @@
   display: flex;
 }
 
-/* Main content shifted to make room for the fixed sidebar */.main-content {
+/* Main content shifted to make room for the fixed sidebar */
+.main-content {
   flex: 1;
   margin-left: 250px;
   padding: 20px;
+  padding-top: 80px;
   transition: margin-left 0.3s ease;
-
   display: flex;
   flex-direction: column;
   min-height: 100vh;
 }
-
 
 /* When sidebar is closed (mobile or toggled closed) set margin to 0 */
 .app-container .main-content.sidebar-closed {
@@ -29,6 +29,103 @@
   }
   .main-content {
     margin-left: 0;
-    padding-top: 70px; /* if you need extra top padding for header on mobile */
+    padding-top: 80px;
+    padding-bottom: 80px;
   }
+}
+
+/* ===== PAGE TRANSITION ANIMATION ===== */
+@keyframes pageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.main-content > * {
+  animation: pageSlideIn 0.35s ease-out;
+}
+
+/* ===== BOUNCE ANIMATION FOR MENU ITEMS (iPhone-like) ===== */
+@keyframes bounceClick {
+  0% { transform: scale(1); }
+  40% { transform: scale(0.92); }
+  60% { transform: scale(1.04); }
+  80% { transform: scale(0.98); }
+  100% { transform: scale(1); }
+}
+
+/* Menu item bounce on click */
+.ant-menu-item:active,
+.ant-menu-submenu-title:active {
+  animation: bounceClick 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+/* Smooth hover transition for menu items */
+.ant-menu-item,
+.ant-menu-submenu-title {
+  transition: background 0.2s ease, transform 0.15s ease !important;
+}
+
+.ant-menu-item:hover,
+.ant-menu-submenu-title:hover {
+  transform: translateX(3px);
+}
+
+/* ===== BUTTON BOUNCE ===== */
+.ant-btn {
+  transition: transform 0.15s ease, box-shadow 0.2s ease !important;
+}
+
+.ant-btn:active {
+  transform: scale(0.95) !important;
+}
+
+.ant-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.35);
+}
+
+/* ===== CARD ENTRANCE ANIMATION ===== */
+@keyframes cardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.ant-card {
+  animation: cardFadeIn 0.4s ease-out;
+}
+
+/* ===== TABLE ROW ANIMATION ===== */
+.ant-table-tbody > tr {
+  transition: transform 0.15s ease, background 0.2s ease;
+}
+
+.ant-table-tbody > tr:hover {
+  transform: scale(1.005);
+}
+
+/* ===== MODAL ANIMATION ===== */
+.ant-modal {
+  animation: pageSlideIn 0.3s ease-out;
+}
+
+/* ===== SMOOTH SCROLLING ===== */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ===== LINK HOVER EFFECTS ===== */
+a {
+  transition: color 0.2s ease, opacity 0.2s ease;
 }

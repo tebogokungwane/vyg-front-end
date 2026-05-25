@@ -33,26 +33,39 @@ const PendingPointsApproval = () => {
     try {
       setLoading(true);
       
-      // Fetch events if not already loaded
-      if (Object.keys(eventsMap).length === 0) {
-        const eventsRes = await axios.get( `/api/base-events/allEvents`);
-        const newEventsMap = {};
-        eventsRes.data.forEach((e) => {
-          newEventsMap[e.id] = e.name;
-        });
-        setEventsMap(newEventsMap);
-      }
-      
       // Fetch pending points
       const res = await axios.get(`/api/points/pending/address/${user.address.id}`);
+      console.log("📋 Pending Points from API (first item):", JSON.stringify(res.data[0], null, 2));
       
-      const enriched = res.data.map(item => ({
-        ...item,
-        baseEvent: { 
-          name: eventsMap[item.baseEventId] || 'Unknown Event' 
-        },
-        formattedAddressName: item.addressName?.replace(/_/g, ' ') // Format address name
-      }));
+      // Fetch events to build a lookup map
+      const eventsRes = await axios.get(`/api/base-events/allEvents`);
+      console.log("📋 Base Events from API:", eventsRes.data);
+      const newEventsMap = {};
+      eventsRes.data.forEach((e) => {
+        newEventsMap[e.id] = e.name;
+        newEventsMap[String(e.id)] = e.name; // Also store string version of key
+      });
+      setEventsMap(newEventsMap);
+      
+      const enriched = res.data.map(item => {
+        // Try multiple ways to get the event name
+        const eventName = 
+          item.baseEventName ||              // Backend sends flat field "baseEventName"
+          item.baseEvent?.name ||            // Backend sends nested object
+          item.eventName ||                  // Alternative flat field
+          newEventsMap[item.baseEventId] ||  // Lookup by numeric ID
+          newEventsMap[item.baseEvent?.id] || // Lookup by nested object ID
+          'Unknown Event';
+        
+        
+        return {
+          ...item,
+          baseEvent: { 
+            name: eventName
+          },
+          formattedAddressName: item.addressName?.replace(/_/g, ' ')
+        };
+      });
       
       const grouped = groupByRequest(enriched);
       setGroupedPoints(grouped);
@@ -66,7 +79,7 @@ const PendingPointsApproval = () => {
 
   useEffect(() => {
     fetchPendingPoints();
-  }, [user, eventsMap]);
+  }, [user]);
 
   const groupByRequest = (data) => {
     const groups = {};
@@ -137,6 +150,23 @@ const PendingPointsApproval = () => {
 
   const columns = [
     {
+      title: 'Actions',
+      key: 'action',
+      width: 120,
+      render: (_, record) => (
+        <Button 
+          type="primary" 
+          size="small"
+          onClick={() => {
+            setSelectedGroup(record); 
+            setModalVisible(true);
+          }}
+        >
+          Review
+        </Button>
+      )
+    },
+    {
       title: 'Branch',
       dataIndex: 'formattedAddressName',
       key: 'addressName',
@@ -165,23 +195,6 @@ const PendingPointsApproval = () => {
       key: 'dateCaptured',
       render: (date) => new Date(date).toLocaleDateString()
     },
-    {
-      title: 'Actions',
-      key: 'action',
-      width: 120,
-      render: (_, record) => (
-        <Button 
-          type="primary" 
-          size="small"
-          onClick={() => {
-            setSelectedGroup(record); 
-            setModalVisible(true);
-          }}
-        >
-          Review
-        </Button>
-      )
-    }
   ];
 
   return (

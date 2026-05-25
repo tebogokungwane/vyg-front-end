@@ -177,7 +177,7 @@ const PendingAdjustmentsApproval = () => {
         open={modalVisible}
         onCancel={() => setModalVisible(false)}
         footer={null}
-        bodyStyle={{ maxHeight: '60vh', overflowY: 'auto' }}
+        styles={{ body: { maxHeight: '60vh', overflowY: 'auto' } }}
         centered
       >
         {selectedRecord && (

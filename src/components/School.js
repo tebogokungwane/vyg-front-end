@@ -265,7 +265,7 @@ const School = () => {
             borderRadius: 8,
             background: "#fff",
           }}
-          bodyStyle={{ padding: screens.xs ? "16px 8px" : "24px" }}
+          styles={{ body: { padding: screens.xs ? "16px 8px" : "24px" } }}
         >
           <div style={{ marginBottom: 24 }}>
             <Space 

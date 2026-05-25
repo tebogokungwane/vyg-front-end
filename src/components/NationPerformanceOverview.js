@@ -69,7 +69,9 @@ const NationPerformanceOverview = () => {
 
           return {
             ...nation,
-            imageUrl: `${baseURL}/api/nations/${nation.id}/image`,
+            imageUrl: nation.imageName
+              ? `${baseURL}/api/nations/${nation.id}/image`
+              : defaultImage,
             performanceByDate: grouped[nation.id]?.performanceByDate || {},
             fallbackImage: defaultImage,
             ...memberStat

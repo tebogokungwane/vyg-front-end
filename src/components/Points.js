@@ -56,8 +56,8 @@ const Points = () => {
     const fetchData = async () => {
       try {
         const [nationRes, eventRes] = await Promise.all([
-          axios.get("http://localhost:2025/api/nations"),
-          axios.get("http://localhost:2025/api/base-events/allEvents"),
+          axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/nations`),
+          axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/base-events/allEvents`),
         ]);
 
         const validNations = nationRes.data.filter(
@@ -199,8 +199,9 @@ const Points = () => {
                   className="nation-card"
                   cover={
                     <img
-                      // src={`http://localhost:2025/api/nations/${nationObj.id}/image`}
-                      src={`${baseURL}/api/nations/${nationObj.id}/image`}
+                      src={nationObj.imageName
+                        ? `${baseURL}/api/nations/${nationObj.id}/image`
+                        : defaultImage}
                        alt={nationObj.nation || "Nation"}
                       className="nation-image"
                       onError={(e) => {
@@ -254,7 +255,9 @@ const Points = () => {
         {selectedNation && (
           <div className="popup-header">
             <img
-              src={`${'baseURL'}/api/nations/${selectedNation.id}/image`}
+              src={selectedNation.imageName
+                ? `${baseURL}/api/nations/${selectedNation.id}/image`
+                : defaultImage}
               alt={selectedNation.nation || "Nation"}
               className="nation-image"
               onError={(e) => {
