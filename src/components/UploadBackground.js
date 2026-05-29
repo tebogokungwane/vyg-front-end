@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Upload, Button, Alert, Card, Spin } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import axios from "../utils/axios";
+import { validateBackground } from "../utils/imageValidator";
 
 const UploadBackground = () => {
   const [fileList, setFileList] = useState([]);
@@ -55,16 +56,14 @@ const UploadBackground = () => {
   };
 
   const uploadProps = {
-    beforeUpload: (file) => {
-      const isImage = file.type.startsWith("image/");
-      if (!isImage) {
-        showError("You can only upload image files (PNG, JPG, etc.).");
+    beforeUpload: async (file) => {
+      const result = await validateBackground(file);
+      if (!result.valid) {
+        showError(result.error);
         return Upload.LIST_IGNORE;
       }
-      const isLt10M = file.size / 1024 / 1024 < 10;
-      if (!isLt10M) {
-        showError("Image must be smaller than 10MB.");
-        return Upload.LIST_IGNORE;
+      if (result.warning) {
+        showSuccess(result.warning);
       }
       setFileList([file]);
       return false;
@@ -72,7 +71,7 @@ const UploadBackground = () => {
     fileList,
     onRemove: () => setFileList([]),
     maxCount: 1,
-    accept: "image/*",
+    accept: "image/png,image/jpeg,image/jpg,image/webp",
   };
 
   return (
@@ -101,6 +100,8 @@ const UploadBackground = () => {
           <h4 style={{ marginBottom: 8 }}>Current Background</h4>
           <p style={{ color: "#666", fontSize: 13, marginBottom: 12 }}>
             This image is used as the login screen background. If no image is uploaded, a default gradient is shown.
+            <br />
+            <strong>Recommended:</strong> 1920×1080px or larger, PNG or JPG. Minimum: 800×600px.
           </p>
           {loadingPreview ? (
             <Spin />

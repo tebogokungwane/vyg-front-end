@@ -71,12 +71,38 @@ function App() {
     }
   }, []);
 
+  // Load background image for main content
+  const [bgImage, setBgImage] = useState(null);
+
+  useEffect(() => {
+    const loadBg = () => {
+      const img = new Image();
+      img.src = `${process.env.REACT_APP_API_BASE_URL}/api/branding/background?t=${Date.now()}`;
+      img.onload = () => setBgImage(img.src);
+      img.onerror = () => setBgImage(null);
+    };
+    loadBg();
+
+    // Listen for background updates
+    window.addEventListener("background-updated", loadBg);
+    return () => window.removeEventListener("background-updated", loadBg);
+  }, []);
+
   // Configure message to always appear at the top consistently
   message.config({
     top: 80,
     duration: 3,
     maxCount: 3,
   });
+
+  const mainContentStyle = bgImage
+    ? {
+        backgroundImage: `url(${bgImage})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundAttachment: "fixed",
+      }
+    : {};
 
   return (
     <UserContext.Provider value={{ user, setUser }}>
@@ -100,7 +126,7 @@ function App() {
               setPageIcon={setPageIcon}
               user={user}
             />
-            <div className="main-content">
+            <div className="main-content" style={mainContentStyle}>
               <Routes>
                 <Route
                   path="/dashboard"

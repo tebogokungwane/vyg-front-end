@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Upload, Button, Alert, Card, Spin } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import axios from "../utils/axios";
+import { validateFavicon } from "../utils/imageValidator";
 
 const UploadFavicon = () => {
   const [fileList, setFileList] = useState([]);
@@ -69,24 +70,22 @@ const UploadFavicon = () => {
   };
 
   const uploadProps = {
-    beforeUpload: (file) => {
-      const isImage = file.type.startsWith("image/");
-      if (!isImage) {
-        showError("You can only upload image files (ICO, PNG, JPG, SVG, etc.).");
+    beforeUpload: async (file) => {
+      const result = await validateFavicon(file);
+      if (!result.valid) {
+        showError(result.error);
         return Upload.LIST_IGNORE;
       }
-      const isLt2M = file.size / 1024 / 1024 < 2;
-      if (!isLt2M) {
-        showError("Favicon must be smaller than 2MB.");
-        return Upload.LIST_IGNORE;
+      if (result.warning) {
+        showError(result.warning); // Show as info
       }
       setFileList([file]);
-      return false; // Prevent auto upload
+      return false;
     },
     fileList,
     onRemove: () => setFileList([]),
     maxCount: 1,
-    accept: "image/*,.ico",
+    accept: "image/png,image/jpeg,image/x-icon,image/svg+xml,.ico",
   };
 
   return (

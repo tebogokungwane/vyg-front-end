@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { Upload, Button, Alert, Card, Spin } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
+import { Upload, Button, Alert, Card, Spin, message } from "antd";
+import { UploadOutlined, CheckCircleOutlined } from "@ant-design/icons";
 import axios from "../utils/axios";
+import { validateLogo } from "../utils/imageValidator";
 
 const UploadLogo = () => {
   const [fileList, setFileList] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [successMessage, setSuccessMessage] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
+  const [warningMessage, setWarningMessage] = useState(null);
   const [logoUrl, setLogoUrl] = useState(null);
   const [loadingPreview, setLoadingPreview] = useState(true);
 
@@ -58,24 +60,23 @@ const UploadLogo = () => {
   };
 
   const uploadProps = {
-    beforeUpload: (file) => {
-      const isImage = file.type.startsWith("image/");
-      if (!isImage) {
-        showError("You can only upload image files (PNG, JPG, SVG, etc.).");
+    beforeUpload: async (file) => {
+      const result = await validateLogo(file);
+      if (!result.valid) {
+        showError(result.error);
         return Upload.LIST_IGNORE;
       }
-      const isLt5M = file.size / 1024 / 1024 < 5;
-      if (!isLt5M) {
-        showError("Image must be smaller than 5MB.");
-        return Upload.LIST_IGNORE;
+      if (result.warning) {
+        setWarningMessage(result.warning);
+        setTimeout(() => setWarningMessage(null), 5000);
       }
       setFileList([file]);
-      return false; // Prevent auto upload
+      return false;
     },
     fileList,
-    onRemove: () => setFileList([]),
+    onRemove: () => { setFileList([]); setWarningMessage(null); },
     maxCount: 1,
-    accept: "image/*",
+    accept: "image/png,image/jpeg,image/jpg,image/webp,image/svg+xml",
   };
 
   return (
@@ -99,9 +100,21 @@ const UploadLogo = () => {
             style={{ marginBottom: 16 }}
           />
         )}
+        {warningMessage && (
+          <Alert
+            message={warningMessage}
+            type="warning"
+            showIcon
+            closable
+            style={{ marginBottom: 16 }}
+          />
+        )}
 
         <div style={{ marginBottom: 24 }}>
           <h4 style={{ marginBottom: 8 }}>Current Logo</h4>
+          <p style={{ color: "#888", fontSize: 12, marginBottom: 8 }}>
+            Recommended: 200×200px or larger, PNG or SVG for best quality.
+          </p>
           {loadingPreview ? (
             <Spin />
           ) : (

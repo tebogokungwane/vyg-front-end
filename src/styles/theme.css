@@ -1,136 +1,177 @@
+/* ============================================
+   THEME VARIABLES
+   ============================================ */
+
 /* Light theme (default) */
 .light-theme {
   --bg-primary: #ffffff;
   --bg-secondary: #f5f5f5;
+  --bg-tertiary: #fafafa;
   --text-primary: #000000;
   --text-secondary: #595959;
+  --text-muted: #8c8c8c;
   --border-color: #d9d9d9;
   --card-bg: #ffffff;
   --sidebar-bg: #ffffff;
   --header-bg: #ffffff;
+  --hover-bg: #f0f0f0;
+  --input-bg: #ffffff;
+  --shadow: rgba(0, 0, 0, 0.08);
 }
 
 /* Dark theme */
 .dark-theme {
   --bg-primary: #141414;
   --bg-secondary: #1f1f1f;
+  --bg-tertiary: #262626;
   --text-primary: #ffffff;
-  --text-secondary: #a6a6a6;
+  --text-secondary: #d9d9d9;
+  --text-muted: #8c8c8c;
   --border-color: #434343;
   --card-bg: #1f1f1f;
-  --sidebar-bg: #1f1f1f;
-  --header-bg: #1f1f1f;
+  --sidebar-bg: #1a1a1a;
+  --header-bg: #1a1a1a;
+  --hover-bg: #2a2a2a;
+  --input-bg: #2a2a2a;
+  --shadow: rgba(0, 0, 0, 0.3);
 }
 
-/* ===== DARK THEME GLOBAL STYLES ===== */
+/* ============================================
+   DARK THEME - GLOBAL TEXT & BACKGROUND
+   ============================================ */
 
-/* Body and main content */
 .dark-theme,
-.dark-theme body,
+.dark-theme body {
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+}
+
 .dark-theme .main-content {
   background-color: var(--bg-primary) !important;
   color: var(--text-primary) !important;
 }
 
-/* All text elements */
-.dark-theme p,
-.dark-theme span,
-.dark-theme div,
-.dark-theme label,
-.dark-theme li,
-.dark-theme td,
-.dark-theme th {
+/* ALL text elements forced white */
+.dark-theme h1, .dark-theme h2, .dark-theme h3,
+.dark-theme h4, .dark-theme h5, .dark-theme h6 {
   color: var(--text-primary) !important;
 }
 
-.dark-theme h1,
-.dark-theme h2,
-.dark-theme h3,
-.dark-theme h4,
-.dark-theme h5,
-.dark-theme h6 {
-  color: var(--text-primary) !important;
+.dark-theme p, .dark-theme span, .dark-theme div,
+.dark-theme label, .dark-theme li, .dark-theme a,
+.dark-theme strong, .dark-theme b, .dark-theme em,
+.dark-theme small, .dark-theme td, .dark-theme th {
+  color: inherit;
 }
 
-/* ===== ICONS - Make black icons white in dark mode ===== */
+/* ============================================
+   DARK THEME - ICONS (black → white)
+   ============================================ */
+
 .dark-theme .anticon {
   color: var(--text-primary) !important;
 }
 
-.dark-theme .ant-menu-item .anticon,
-.dark-theme .ant-menu-submenu-title .anticon {
-  color: inherit !important;
+.dark-theme svg:not(.recharts-surface) {
+  color: var(--text-primary) !important;
+  fill: currentColor !important;
 }
 
-/* React-icons (FaTiktok etc.) */
-.dark-theme svg {
-  fill: currentColor;
+/* Keep colored icons in specific contexts */
+.dark-theme .ant-btn-primary .anticon {
+  color: #fff !important;
 }
 
 .dark-theme .social-link-item svg,
 .dark-theme .social-link-item .anticon {
-  color: #ffffff !important;
-}
-
-.dark-theme .ant-menu-item svg,
-.dark-theme .ant-menu-submenu-title svg {
   color: var(--text-primary) !important;
-  fill: var(--text-primary) !important;
 }
 
-/* ===== HEADER ===== */
+/* ============================================
+   DARK THEME - HEADER
+   ============================================ */
+
 .dark-theme .header {
   background: var(--header-bg) !important;
-  border-bottom: 1px solid var(--border-color);
-  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.3) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  box-shadow: 0 2px 8px var(--shadow) !important;
 }
 
-.dark-theme .app-name {
+.dark-theme .app-name,
+.dark-theme .user-name,
+.dark-theme .header-center h1 {
   color: var(--text-primary) !important;
 }
 
-.dark-theme .user-name {
-  color: var(--text-primary) !important;
-}
+/* ============================================
+   DARK THEME - SIDEBAR
+   ============================================ */
 
-/* ===== SIDEBAR ===== */
 .dark-theme .sidebar {
   background: var(--sidebar-bg) !important;
   border-right: 1px solid var(--border-color) !important;
+  box-shadow: 2px 0 8px var(--shadow) !important;
 }
 
 .dark-theme .ant-menu {
-  background: var(--sidebar-bg) !important;
+  background: transparent !important;
   color: var(--text-primary) !important;
 }
 
-.dark-theme .ant-menu-item,
+.dark-theme .ant-menu-item {
+  color: var(--text-primary) !important;
+}
+
 .dark-theme .ant-menu-submenu-title {
   color: var(--text-primary) !important;
 }
 
 .dark-theme .ant-menu-item:hover,
 .dark-theme .ant-menu-submenu-title:hover {
-  background: #2a2a2a !important;
+  background: var(--hover-bg) !important;
 }
 
 .dark-theme .ant-menu-item-selected {
-  background: #1890ff22 !important;
+  background: rgba(24, 144, 255, 0.15) !important;
+  color: #1890ff !important;
 }
 
-.dark-theme .ant-menu-sub {
-  background: #1a1a1a !important;
+.dark-theme .ant-menu-sub,
+.dark-theme .ant-menu-sub.ant-menu-inline {
+  background: var(--bg-primary) !important;
 }
 
-/* ===== BUTTONS ===== */
+.dark-theme .ant-menu-item .ant-menu-item-icon,
+.dark-theme .ant-menu-submenu-title .ant-menu-item-icon {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .sidebar-logout {
+  border-top: 1px solid var(--border-color) !important;
+}
+
+.dark-theme .sidebar-logout div,
+.dark-theme .sidebar-logout span {
+  color: var(--text-secondary) !important;
+}
+
+.dark-theme .mobile-user-info {
+  background: var(--bg-secondary) !important;
+  border-top: 1px solid var(--border-color) !important;
+}
+
+/* ============================================
+   DARK THEME - BUTTONS
+   ============================================ */
+
 .dark-theme .ant-btn-default {
-  background: #2a2a2a !important;
+  background: var(--input-bg) !important;
   border-color: var(--border-color) !important;
   color: var(--text-primary) !important;
 }
 
 .dark-theme .ant-btn-default:hover {
-  background: #3a3a3a !important;
+  background: var(--hover-bg) !important;
   border-color: #1890ff !important;
   color: #1890ff !important;
 }
@@ -140,14 +181,23 @@
 }
 
 .dark-theme .ant-btn-text:hover {
-  background: #2a2a2a !important;
+  background: var(--hover-bg) !important;
 }
 
 .dark-theme .ant-btn-link {
   color: #1890ff !important;
 }
 
-/* ===== CARDS ===== */
+.dark-theme .ant-btn-dashed {
+  background: var(--input-bg) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+/* ============================================
+   DARK THEME - CARDS
+   ============================================ */
+
 .dark-theme .ant-card {
   background: var(--card-bg) !important;
   border-color: var(--border-color) !important;
@@ -155,9 +205,9 @@
 }
 
 .dark-theme .ant-card-head {
-  color: var(--text-primary) !important;
-  border-color: var(--border-color) !important;
   background: var(--card-bg) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
 }
 
 .dark-theme .ant-card-head-title {
@@ -168,41 +218,140 @@
   color: var(--text-primary) !important;
 }
 
-/* ===== TABLES ===== */
+.dark-theme .ant-card-meta-title {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .ant-card-meta-description {
+  color: var(--text-secondary) !important;
+}
+
+/* ============================================
+   DARK THEME - TABLES
+   ============================================ */
+
 .dark-theme .ant-table {
   background: var(--card-bg) !important;
   color: var(--text-primary) !important;
 }
 
-.dark-theme .ant-table-thead > tr > th {
-  background: #2a2a2a !important;
+.dark-theme .ant-table-container {
+  border-color: var(--border-color) !important;
+}
+
+.dark-theme .ant-table-thead > tr > th,
+.dark-theme .ant-table-thead > tr > td {
+  background: var(--bg-tertiary) !important;
   color: var(--text-primary) !important;
   border-color: var(--border-color) !important;
 }
 
 .dark-theme .ant-table-tbody > tr > td {
+  background: var(--card-bg) !important;
   border-color: var(--border-color) !important;
   color: var(--text-primary) !important;
-  background: var(--card-bg) !important;
 }
 
 .dark-theme .ant-table-tbody > tr:hover > td {
-  background: #2a2a2a !important;
+  background: var(--hover-bg) !important;
+}
+
+.dark-theme .ant-table-tbody > tr.ant-table-row:hover > td {
+  background: var(--hover-bg) !important;
 }
 
 .dark-theme .ant-table-cell {
   color: var(--text-primary) !important;
 }
 
-.dark-theme .ant-empty-description {
-  color: var(--text-secondary) !important;
-}
-
 .dark-theme .ant-table-placeholder {
   background: var(--card-bg) !important;
 }
 
-/* ===== MODALS ===== */
+.dark-theme .ant-table-placeholder .ant-empty-description {
+  color: var(--text-muted) !important;
+}
+
+.dark-theme .ant-table-bordered .ant-table-container {
+  border-color: var(--border-color) !important;
+}
+
+/* ============================================
+   DARK THEME - FORMS & INPUTS
+   ============================================ */
+
+.dark-theme .ant-input,
+.dark-theme .ant-input-affix-wrapper,
+.dark-theme .ant-select-selector,
+.dark-theme .ant-picker,
+.dark-theme .ant-input-number,
+.dark-theme .ant-input-number-input,
+.dark-theme textarea.ant-input {
+  background: var(--input-bg) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .ant-input::placeholder,
+.dark-theme .ant-input-number-input::placeholder,
+.dark-theme textarea::placeholder {
+  color: var(--text-muted) !important;
+}
+
+.dark-theme .ant-input-prefix,
+.dark-theme .ant-input-suffix {
+  color: var(--text-muted) !important;
+}
+
+.dark-theme .ant-form-item-label > label {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .ant-form-item-explain,
+.dark-theme .ant-form-item-extra {
+  color: var(--text-muted) !important;
+}
+
+.dark-theme .ant-select-arrow {
+  color: var(--text-muted) !important;
+}
+
+.dark-theme .ant-select-clear {
+  background: var(--input-bg) !important;
+  color: var(--text-muted) !important;
+}
+
+.dark-theme .ant-select-selection-placeholder {
+  color: var(--text-muted) !important;
+}
+
+.dark-theme .ant-select-selection-item {
+  color: var(--text-primary) !important;
+}
+
+/* Select dropdown */
+.dark-theme .ant-select-dropdown {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.dark-theme .ant-select-item {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .ant-select-item-option-active:not(.ant-select-item-option-disabled) {
+  background: var(--hover-bg) !important;
+}
+
+.dark-theme .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
+  background: rgba(24, 144, 255, 0.2) !important;
+  color: #1890ff !important;
+}
+
+/* ============================================
+   DARK THEME - MODALS
+   ============================================ */
+
 .dark-theme .ant-modal-content {
   background: var(--card-bg) !important;
   color: var(--text-primary) !important;
@@ -225,75 +374,18 @@
   color: var(--text-primary) !important;
 }
 
-/* ===== FORMS & INPUTS ===== */
-.dark-theme .ant-input,
-.dark-theme .ant-input-affix-wrapper,
-.dark-theme .ant-select-selector,
-.dark-theme .ant-picker,
-.dark-theme .ant-input-number,
-.dark-theme .ant-input-textarea textarea {
-  background: #2a2a2a !important;
-  border-color: var(--border-color) !important;
+.dark-theme .ant-modal-confirm-title,
+.dark-theme .ant-modal-confirm-content {
   color: var(--text-primary) !important;
 }
 
-.dark-theme .ant-input::placeholder,
-.dark-theme .ant-input-number input::placeholder,
-.dark-theme textarea::placeholder {
-  color: var(--text-secondary) !important;
-}
+/* ============================================
+   DARK THEME - DRAWERS
+   ============================================ */
 
-.dark-theme .ant-input-prefix,
-.dark-theme .ant-input-suffix {
-  color: var(--text-secondary) !important;
-}
-
-.dark-theme .ant-form-item-label > label {
-  color: var(--text-primary) !important;
-}
-
-.dark-theme .ant-select-arrow {
-  color: var(--text-secondary) !important;
-}
-
-.dark-theme .ant-select-dropdown {
-  background: #2a2a2a !important;
-}
-
-.dark-theme .ant-select-item {
-  color: var(--text-primary) !important;
-}
-
-.dark-theme .ant-select-item-option-active {
-  background: #3a3a3a !important;
-}
-
-.dark-theme .ant-select-item-option-selected {
-  background: #1890ff33 !important;
-}
-
-/* ===== SWITCH ===== */
-.dark-theme .ant-switch {
-  background: #434343 !important;
-}
-
-.dark-theme .ant-switch-checked {
-  background: #1890ff !important;
-}
-
-/* ===== POPCONFIRM & POPOVER ===== */
-.dark-theme .ant-popover-inner {
-  background: #2a2a2a !important;
-}
-
-.dark-theme .ant-popover-message-title,
-.dark-theme .ant-popconfirm-message-title {
-  color: var(--text-primary) !important;
-}
-
-/* ===== DRAWER ===== */
 .dark-theme .ant-drawer-content {
   background: var(--card-bg) !important;
+  color: var(--text-primary) !important;
 }
 
 .dark-theme .ant-drawer-header {
@@ -305,9 +397,16 @@
   color: var(--text-primary) !important;
 }
 
-/* ===== FOOTER ===== */
+.dark-theme .ant-drawer-close {
+  color: var(--text-primary) !important;
+}
+
+/* ============================================
+   DARK THEME - FOOTER
+   ============================================ */
+
 .dark-theme .app-footer {
-  background-color: rgba(31, 31, 31, 0.95) !important;
+  background-color: rgba(26, 26, 26, 0.95) !important;
   border-color: var(--border-color) !important;
 }
 
@@ -315,9 +414,20 @@
   color: var(--text-secondary) !important;
 }
 
-/* ===== ALERTS ===== */
+/* ============================================
+   DARK THEME - ALERTS
+   ============================================ */
+
 .dark-theme .ant-alert {
   border-color: var(--border-color) !important;
+}
+
+.dark-theme .ant-alert-message {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .ant-alert-description {
+  color: var(--text-secondary) !important;
 }
 
 .dark-theme .ant-alert-info {
@@ -328,13 +438,32 @@
   background: #162312 !important;
 }
 
+.dark-theme .ant-alert-warning {
+  background: #2b2111 !important;
+}
+
 .dark-theme .ant-alert-error {
   background: #2a1215 !important;
 }
 
-/* ===== PAGINATION ===== */
+/* ============================================
+   DARK THEME - SWITCH
+   ============================================ */
+
+.dark-theme .ant-switch {
+  background: var(--border-color) !important;
+}
+
+.dark-theme .ant-switch-checked {
+  background: #1890ff !important;
+}
+
+/* ============================================
+   DARK THEME - PAGINATION
+   ============================================ */
+
 .dark-theme .ant-pagination-item {
-  background: #2a2a2a !important;
+  background: var(--input-bg) !important;
   border-color: var(--border-color) !important;
 }
 
@@ -346,7 +475,21 @@
   border-color: #1890ff !important;
 }
 
-/* ===== TABS ===== */
+.dark-theme .ant-pagination-item-active a {
+  color: #1890ff !important;
+}
+
+.dark-theme .ant-pagination-prev .ant-pagination-item-link,
+.dark-theme .ant-pagination-next .ant-pagination-item-link {
+  background: var(--input-bg) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+/* ============================================
+   DARK THEME - TABS
+   ============================================ */
+
 .dark-theme .ant-tabs-tab {
   color: var(--text-secondary) !important;
 }
@@ -355,50 +498,623 @@
   color: #1890ff !important;
 }
 
-/* ===== TAGS ===== */
+.dark-theme .ant-tabs-ink-bar {
+  background: #1890ff !important;
+}
+
+/* ============================================
+   DARK THEME - TAGS
+   ============================================ */
+
 .dark-theme .ant-tag {
   border-color: var(--border-color) !important;
 }
 
-/* ===== DATEPICKER DROPDOWN ===== */
-.dark-theme .ant-picker-dropdown .ant-picker-panel-container {
-  background: #2a2a2a !important;
-}
-
-.dark-theme .ant-picker-dropdown .ant-picker-header,
-.dark-theme .ant-picker-dropdown .ant-picker-content th {
+.dark-theme .ant-tag-default {
+  background: var(--bg-tertiary) !important;
   color: var(--text-primary) !important;
 }
 
-.dark-theme .ant-picker-dropdown .ant-picker-cell {
+/* ============================================
+   DARK THEME - DATEPICKER
+   ============================================ */
+
+.dark-theme .ant-picker-dropdown .ant-picker-panel-container {
+  background: var(--bg-secondary) !important;
+}
+
+.dark-theme .ant-picker-dropdown .ant-picker-header {
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.dark-theme .ant-picker-dropdown .ant-picker-header button {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .ant-picker-dropdown .ant-picker-content th {
   color: var(--text-secondary) !important;
+}
+
+.dark-theme .ant-picker-dropdown .ant-picker-cell {
+  color: var(--text-muted) !important;
 }
 
 .dark-theme .ant-picker-dropdown .ant-picker-cell-in-view {
   color: var(--text-primary) !important;
 }
 
-/* ===== TOOLTIP ===== */
-.dark-theme .ant-tooltip-inner {
-  background: #2a2a2a !important;
+.dark-theme .ant-picker-dropdown .ant-picker-cell-selected .ant-picker-cell-inner {
+  background: #1890ff !important;
+}
+
+/* ============================================
+   DARK THEME - POPOVER & POPCONFIRM
+   ============================================ */
+
+.dark-theme .ant-popover-inner {
+  background: var(--bg-secondary) !important;
+}
+
+.dark-theme .ant-popover-inner-content {
   color: var(--text-primary) !important;
 }
 
-/* ===== SPIN ===== */
+.dark-theme .ant-popconfirm-message-title {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .ant-popover-title {
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* ============================================
+   DARK THEME - TOOLTIP
+   ============================================ */
+
+.dark-theme .ant-tooltip-inner {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* ============================================
+   DARK THEME - UPLOAD
+   ============================================ */
+
+.dark-theme .ant-upload-list-item {
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.dark-theme .ant-upload-list-item-name {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .ant-upload-drag {
+  background: var(--input-bg) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* ============================================
+   DARK THEME - SPIN / LOADING
+   ============================================ */
+
 .dark-theme .ant-spin-text {
   color: var(--text-primary) !important;
 }
 
-/* ===== UPLOAD ===== */
-.dark-theme .ant-upload-list-item {
+/* ============================================
+   DARK THEME - STATISTIC / DASHBOARD
+   ============================================ */
+
+.dark-theme .ant-statistic-title {
+  color: var(--text-secondary) !important;
+}
+
+.dark-theme .ant-statistic-content {
   color: var(--text-primary) !important;
 }
 
-/* ===== SIDEBAR LOGOUT AREA ===== */
-.dark-theme .sidebar-logout {
-  border-top-color: var(--border-color) !important;
+.dark-theme .ant-statistic-content-value {
+  color: var(--text-primary) !important;
 }
 
-.dark-theme .sidebar-logout div {
+/* ============================================
+   DARK THEME - DIVIDER
+   ============================================ */
+
+.dark-theme .ant-divider {
+  border-color: var(--border-color) !important;
+}
+
+.dark-theme .ant-divider-inner-text {
+  color: var(--text-primary) !important;
+}
+
+/* ============================================
+   DARK THEME - BREADCRUMB
+   ============================================ */
+
+.dark-theme .ant-breadcrumb-link,
+.dark-theme .ant-breadcrumb-separator {
   color: var(--text-secondary) !important;
+}
+
+/* ============================================
+   DARK THEME - TYPOGRAPHY
+   ============================================ */
+
+.dark-theme .ant-typography {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .ant-typography.ant-typography-secondary {
+  color: var(--text-secondary) !important;
+}
+
+/* ============================================
+   DARK THEME - COLLAPSE / ACCORDION
+   ============================================ */
+
+.dark-theme .ant-collapse {
+  background: var(--card-bg) !important;
+  border-color: var(--border-color) !important;
+}
+
+.dark-theme .ant-collapse-header {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .ant-collapse-content {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+/* ============================================
+   DARK THEME - EMPTY STATE
+   ============================================ */
+
+.dark-theme .ant-empty-description {
+  color: var(--text-muted) !important;
+}
+
+/* ============================================
+   DARK THEME - BADGE
+   ============================================ */
+
+.dark-theme .ant-badge-count {
+  box-shadow: 0 0 0 1px var(--bg-primary) !important;
+}
+
+/* ============================================
+   DARK THEME - DROPDOWN MENU
+   ============================================ */
+
+.dark-theme .ant-dropdown-menu {
+  background: var(--bg-secondary) !important;
+}
+
+.dark-theme .ant-dropdown-menu-item {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .ant-dropdown-menu-item:hover {
+  background: var(--hover-bg) !important;
+}
+
+/* ============================================
+   DARK THEME - BACKGROUND IMAGE OVERLAY
+   When background image is set, add a semi-transparent
+   overlay so content remains readable
+   ============================================ */
+
+.dark-theme .main-content[style*="background-image"] {
+  position: relative;
+}
+
+/* ============================================
+   DARK THEME - MISC OVERRIDES
+   ============================================ */
+
+/* Ensure inline styles don't override dark text */
+.dark-theme [style*="color: #333"],
+.dark-theme [style*="color: #000"],
+.dark-theme [style*="color: black"],
+.dark-theme [style*="color: rgb(0, 0, 0)"] {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme [style*="background-color: #fff"],
+.dark-theme [style*="background-color: #ffffff"],
+.dark-theme [style*="background-color: white"],
+.dark-theme [style*="backgroundColor: \"#fff\""] {
+  background-color: var(--card-bg) !important;
+}
+
+
+/* ============================================
+   DARK THEME - DATEPICKER (INPUT FIELD)
+   ============================================ */
+
+.dark-theme .ant-picker {
+  background: var(--input-bg) !important;
+  border-color: var(--border-color) !important;
+}
+
+.dark-theme .ant-picker input {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .ant-picker input::placeholder {
+  color: var(--text-muted) !important;
+}
+
+.dark-theme .ant-picker-suffix,
+.dark-theme .ant-picker-clear {
+  color: var(--text-muted) !important;
+}
+
+.dark-theme .ant-picker-separator {
+  color: var(--text-muted) !important;
+}
+
+.dark-theme .ant-picker-active-bar {
+  background: #1890ff !important;
+}
+
+/* DatePicker panel/dropdown */
+.dark-theme .ant-picker-panel {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.dark-theme .ant-picker-header {
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.dark-theme .ant-picker-header button {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .ant-picker-header button:hover {
+  color: #1890ff !important;
+}
+
+.dark-theme .ant-picker-body {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .ant-picker-content th {
+  color: var(--text-secondary) !important;
+}
+
+.dark-theme .ant-picker-cell {
+  color: var(--text-muted) !important;
+}
+
+.dark-theme .ant-picker-cell-in-view {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .ant-picker-cell:hover .ant-picker-cell-inner {
+  background: var(--hover-bg) !important;
+}
+
+.dark-theme .ant-picker-cell-selected .ant-picker-cell-inner,
+.dark-theme .ant-picker-cell-range-start .ant-picker-cell-inner,
+.dark-theme .ant-picker-cell-range-end .ant-picker-cell-inner {
+  background: #1890ff !important;
+  color: #fff !important;
+}
+
+.dark-theme .ant-picker-today-btn {
+  color: #1890ff !important;
+}
+
+.dark-theme .ant-picker-footer {
+  border-color: var(--border-color) !important;
+}
+
+.dark-theme .ant-picker-week-panel-row:hover td {
+  background: var(--hover-bg) !important;
+}
+
+.dark-theme .ant-picker-week-panel-row-selected td {
+  background: #1890ff !important;
+}
+
+/* ============================================
+   DARK THEME - PRIMARY BUTTON TEXT FIX
+   Primary buttons must always have WHITE text
+   ============================================ */
+
+.dark-theme .ant-btn-primary {
+  color: #ffffff !important;
+}
+
+.dark-theme .ant-btn-primary span {
+  color: #ffffff !important;
+}
+
+.dark-theme .ant-btn-primary .anticon {
+  color: #ffffff !important;
+}
+
+.dark-theme .ant-btn-primary:hover {
+  color: #ffffff !important;
+}
+
+.dark-theme .ant-btn-primary:disabled {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Default/secondary button text */
+.dark-theme .ant-btn-default span {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .ant-btn-default .anticon {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .ant-btn-default:hover span {
+  color: #1890ff !important;
+}
+
+/* Ghost button */
+.dark-theme .ant-btn-ghost {
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* Danger button */
+.dark-theme .ant-btn-dangerous {
+  color: #ff4d4f !important;
+}
+
+.dark-theme .ant-btn-dangerous span {
+  color: #ff4d4f !important;
+}
+
+/* ============================================
+   DARK THEME - UPLOAD BUTTON TEXT
+   ============================================ */
+
+.dark-theme .ant-upload .ant-btn span {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .ant-upload .ant-btn .anticon {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .ant-upload-list-item-info {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .ant-upload-list-item-info .ant-upload-list-item-name {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .ant-upload-text {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .ant-upload-hint {
+  color: var(--text-secondary) !important;
+}
+
+/* ============================================
+   DARK THEME - INPUT NUMBER
+   ============================================ */
+
+.dark-theme .ant-input-number {
+  background: var(--input-bg) !important;
+  border-color: var(--border-color) !important;
+}
+
+.dark-theme .ant-input-number-input {
+  color: var(--text-primary) !important;
+  background: transparent !important;
+}
+
+.dark-theme .ant-input-number-handler-wrap {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.dark-theme .ant-input-number-handler {
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .ant-input-number-handler .anticon {
+  color: var(--text-primary) !important;
+}
+
+/* ============================================
+   DARK THEME - RADIO & CHECKBOX
+   ============================================ */
+
+.dark-theme .ant-radio-wrapper,
+.dark-theme .ant-checkbox-wrapper {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .ant-radio-inner {
+  background: var(--input-bg) !important;
+  border-color: var(--border-color) !important;
+}
+
+.dark-theme .ant-checkbox-inner {
+  background: var(--input-bg) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* ============================================
+   DARK THEME - DESCRIPTIONS / PROFILE
+   ============================================ */
+
+.dark-theme .ant-descriptions-item-label {
+  color: var(--text-secondary) !important;
+  background: var(--bg-tertiary) !important;
+}
+
+.dark-theme .ant-descriptions-item-content {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .ant-descriptions-bordered .ant-descriptions-item-label,
+.dark-theme .ant-descriptions-bordered .ant-descriptions-item-content {
+  border-color: var(--border-color) !important;
+}
+
+.dark-theme .ant-descriptions-view {
+  border-color: var(--border-color) !important;
+}
+
+/* ============================================
+   DARK THEME - LIST
+   ============================================ */
+
+.dark-theme .ant-list-item {
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .ant-list-item-meta-title {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .ant-list-item-meta-description {
+  color: var(--text-secondary) !important;
+}
+
+/* ============================================
+   DARK THEME - AVATAR
+   ============================================ */
+
+.dark-theme .ant-avatar {
+  border-color: var(--border-color) !important;
+}
+
+/* ============================================
+   DARK THEME - SPACE & LAYOUT HELPERS
+   ============================================ */
+
+.dark-theme .ant-space {
+  color: var(--text-primary) !important;
+}
+
+/* ============================================
+   DARK THEME - INLINE STYLE OVERRIDES
+   Force override common inline dark colors
+   ============================================ */
+
+.dark-theme [style*="color: #333"] {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme [style*="color: #000"] {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme [style*="color: #666"] {
+  color: var(--text-secondary) !important;
+}
+
+.dark-theme [style*="color: #595959"] {
+  color: var(--text-secondary) !important;
+}
+
+.dark-theme [style*="color: rgb(0, 0, 0)"] {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme [style*="color: rgb(89, 89, 89)"] {
+  color: var(--text-secondary) !important;
+}
+
+.dark-theme [style*="background-color: #fff"],
+.dark-theme [style*="background-color: #ffffff"],
+.dark-theme [style*="background-color: white"],
+.dark-theme [style*="background: #fff"],
+.dark-theme [style*="background: #ffffff"],
+.dark-theme [style*="background: white"],
+.dark-theme [style*="background: rgb(255, 255, 255)"],
+.dark-theme [style*="backgroundColor"] {
+  background-color: var(--card-bg) !important;
+  background: var(--card-bg) !important;
+}
+
+/* ============================================
+   DARK THEME - TEXTAREA
+   ============================================ */
+
+.dark-theme textarea.ant-input {
+  background: var(--input-bg) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.dark-theme textarea.ant-input::placeholder {
+  color: var(--text-muted) !important;
+}
+
+/* ============================================
+   DARK THEME - STEPS
+   ============================================ */
+
+.dark-theme .ant-steps-item-title {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .ant-steps-item-description {
+  color: var(--text-secondary) !important;
+}
+
+/* ============================================
+   DARK THEME - MESSAGE (toast)
+   ============================================ */
+
+.dark-theme .ant-message-notice-content {
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  box-shadow: 0 4px 12px var(--shadow) !important;
+}
+
+/* ============================================
+   DARK THEME - NOTIFICATION
+   ============================================ */
+
+.dark-theme .ant-notification-notice {
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .ant-notification-notice-message {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .ant-notification-notice-description {
+  color: var(--text-secondary) !important;
+}
+
+/* ============================================
+   DARK THEME - SEGMENTED
+   ============================================ */
+
+.dark-theme .ant-segmented {
+  background: var(--bg-tertiary) !important;
+}
+
+.dark-theme .ant-segmented-item-label {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .ant-segmented-item-selected {
+  background: var(--card-bg) !important;
 }
