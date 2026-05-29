@@ -36,8 +36,7 @@ const Login = () => {
         email: values.email,
         password: values.password
       }, {
-        headers: { "Content-Type": "application/json" },
-        withCredentials: true
+        headers: { "Content-Type": "application/json" }
       });
 
       if (res.status === 200) {
