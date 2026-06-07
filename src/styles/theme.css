@@ -65,19 +65,25 @@
 }
 
 /* ============================================
-   DARK THEME - ICONS (black → white)
+   DARK THEME - ICONS
+   Keep colored icons visible, only override generic black ones
    ============================================ */
 
-.dark-theme .anticon {
+.dark-theme .anticon:not([style]) {
   color: var(--text-primary) !important;
 }
 
-.dark-theme svg:not(.recharts-surface) {
-  color: var(--text-primary) !important;
-  fill: currentColor !important;
+/* Menu icons: keep their inline colors */
+.dark-theme .ant-menu-item .anticon[style],
+.dark-theme .ant-menu-submenu-title .anticon[style] {
+  /* preserve inline color styles */
 }
 
-/* Keep colored icons in specific contexts */
+.dark-theme svg:not(.recharts-surface):not([style*="color"]) {
+  color: var(--text-primary) !important;
+}
+
+/* Primary button icons always white */
 .dark-theme .ant-btn-primary .anticon {
   color: #fff !important;
 }
@@ -1117,4 +1123,141 @@
 
 .dark-theme .ant-segmented-item-selected {
   background: var(--card-bg) !important;
+}
+
+
+/* ============================================
+   DARK THEME - FORM FIELDS VISIBILITY FIX
+   Ensures all form inputs, labels, and text are visible
+   ============================================ */
+
+/* Input text color - catch all variants */
+.dark-theme input,
+.dark-theme input.ant-input,
+.dark-theme .ant-input,
+.dark-theme .ant-input-affix-wrapper > input.ant-input {
+  color: var(--text-primary) !important;
+  background: var(--input-bg) !important;
+}
+
+.dark-theme input::placeholder,
+.dark-theme .ant-input::placeholder {
+  color: var(--text-muted) !important;
+}
+
+/* Select text */
+.dark-theme .ant-select .ant-select-selection-item {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .ant-select .ant-select-selection-placeholder {
+  color: var(--text-muted) !important;
+}
+
+.dark-theme .ant-select-selector {
+  background: var(--input-bg) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Input number */
+.dark-theme .ant-input-number-input {
+  color: var(--text-primary) !important;
+  background: transparent !important;
+}
+
+/* TextArea */
+.dark-theme textarea,
+.dark-theme textarea.ant-input {
+  color: var(--text-primary) !important;
+  background: var(--input-bg) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* Form labels */
+.dark-theme .ant-form-item-label > label {
+  color: var(--text-primary) !important;
+}
+
+/* Form required asterisk */
+.dark-theme .ant-form-item-required::before {
+  color: #ff4d4f !important;
+}
+
+/* Form help/error text */
+.dark-theme .ant-form-item-explain-error {
+  color: #ff4d4f !important;
+}
+
+/* Input wrapper (password, search etc) */
+.dark-theme .ant-input-affix-wrapper {
+  background: var(--input-bg) !important;
+  border-color: var(--border-color) !important;
+}
+
+.dark-theme .ant-input-affix-wrapper input {
+  color: var(--text-primary) !important;
+  background: transparent !important;
+}
+
+/* Input group addon */
+.dark-theme .ant-input-group-addon {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Password toggle icon */
+.dark-theme .ant-input-password-icon {
+  color: var(--text-muted) !important;
+}
+
+/* Search input */
+.dark-theme .ant-input-search .ant-input {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .ant-input-search-button {
+  border-color: var(--border-color) !important;
+}
+
+/* Input focus state */
+.dark-theme .ant-input:focus,
+.dark-theme .ant-input-focused,
+.dark-theme .ant-input-affix-wrapper:focus,
+.dark-theme .ant-input-affix-wrapper-focused,
+.dark-theme .ant-select-focused .ant-select-selector {
+  border-color: #1890ff !important;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+}
+
+/* Disabled input */
+.dark-theme .ant-input-disabled,
+.dark-theme .ant-input[disabled],
+.dark-theme .ant-select-disabled .ant-select-selector {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-muted) !important;
+  border-color: var(--border-color) !important;
+}
+
+
+/* ============================================
+   FIX: Form input text ALWAYS visible
+   Light mode: black text. Dark mode: white text.
+   ============================================ */
+
+/* Light mode form inputs - ensure black text */
+.light-theme input,
+.light-theme .ant-input,
+.light-theme .ant-select-selection-item,
+.light-theme textarea {
+  color: #000 !important;
+}
+
+.light-theme .ant-form-item-label > label {
+  color: #000 !important;
+}
+
+.light-theme .ant-input-affix-wrapper > input {
+  color: #000 !important;
 }

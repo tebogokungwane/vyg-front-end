@@ -117,28 +117,36 @@ const ManageChurchAddresses = () => {
   ];
 
   return (
-    <div className="manage-address-wrapper">
-      <div className="manage-address-header">
-        <Input.Search
-          placeholder="Search by province, branch or address"
-          allowClear
-          value={searchText}
-          onChange={(e) => handleSearch(e.target.value)}
-        />
-        <Button disabled type="primary" onClick={() => openModal()}>
-          ➕ Add New Address
-        </Button>
+    <div className="page-wrapper">
+      <div className="page-header">
+        <h2>Manage Church Addresses</h2>
+        <p>View and manage branch addresses</p>
       </div>
 
-      <div className="manage-address-table-wrapper">
-        <Table
-          dataSource={filteredAddresses}
-          columns={columns}
-          rowKey="id"
-          bordered
-          loading={loading}
-          pagination={{ pageSize: 8 }}
-        />
+      <div className="page-card">
+        <div style={{ display: "flex", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
+          <Input.Search
+            placeholder="Search by province, branch or address"
+            allowClear
+            value={searchText}
+            onChange={(e) => handleSearch(e.target.value)}
+            style={{ flex: 1, minWidth: 200, borderRadius: 8 }}
+          />
+          <Button disabled type="primary" onClick={() => openModal()} style={{ borderRadius: 10 }}>
+            ➕ Add New Address
+          </Button>
+        </div>
+
+        <div className="modern-table">
+          <Table
+            dataSource={filteredAddresses}
+            columns={columns}
+            rowKey="id"
+            loading={loading}
+            pagination={{ pageSize: 8 }}
+            scroll={{ x: true }}
+          />
+        </div>
       </div>
 
       <Modal

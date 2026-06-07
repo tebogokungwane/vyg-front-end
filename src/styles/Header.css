@@ -100,3 +100,17 @@
   margin-right: 40px;
 }
 
+
+
+.logout-btn {
+  font-weight: 500;
+  font-size: 14px;
+  margin-right: 10px;
+  border-radius: 8px;
+}
+
+@media (max-width: 768px) {
+  .logout-btn {
+    margin-right: 5px;
+  }
+}

@@ -104,42 +104,35 @@ const ManageNations = () => {
   ];
 
   return (
-    <div style={{ padding: 20, maxWidth: 900, margin: "0 auto" }}>
-      {/* Button bar - always visible */}
-      <div
-        style={{
-          position: "sticky",
-          top: 80,
-          zIndex: 99,
-          background: "#fff",
-          padding: "12px 0",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 12,
-          borderBottom: "1px solid #f0f0f0",
-          marginBottom: 16,
-        }}
-      >
-        <h2 style={{ margin: 0, fontSize: 18 }}>🇿🇦 Manage Nations</h2>
-        <Button
-          type="primary"
-          onClick={() => openModal()}
-          icon={<PlusOutlined />}
-          size="large"
-        >
-          Add Nation
+    <div className="page-wrapper">
+      <div className="page-header">
+        <h2>Manage Nations</h2>
+        <p>Add, edit, or remove nations</p>
+      </div>
+
+      <div className="page-card">
+        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16 }}>
+          <Button
+            type="primary"
+            onClick={() => openModal()}
+            icon={<PlusOutlined />}
+            size="large"
+            style={{ borderRadius: 10 }}
+          >
+            Add Nation
         </Button>
       </div>
 
-      <Table
-        rowKey="id"
-        dataSource={nations}
-        columns={columns}
-        loading={loading}
-        scroll={{ x: true }}
-      />
+      <div className="modern-table">
+        <Table
+          rowKey="id"
+          dataSource={nations}
+          columns={columns}
+          loading={loading}
+          scroll={{ x: true }}
+        />
+      </div>
+      </div>
 
       <Modal
         open={modalVisible}

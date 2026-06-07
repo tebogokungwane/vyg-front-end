@@ -1,19 +1,12 @@
-import React, { useState, useEffect, useContext } from "react";
-import {
-  Card,
-  Row,
-  Col,
-  Statistic,
-  Spin,
-  Alert,
-  Typography
-} from "antd";
+import { useState, useEffect, useContext } from "react";
+import { Card, Row, Col, Spin, Alert, Typography } from "antd";
 import {
   TeamOutlined,
   UserOutlined,
   UsergroupAddOutlined,
   DeploymentUnitOutlined,
-  TrophyOutlined
+  TrophyOutlined,
+  RiseOutlined,
 } from "@ant-design/icons";
 import axios from "../utils/axios";
 import UserContext from "../context/UserContext";
@@ -28,158 +21,185 @@ const Dashboard = () => {
   const [error, setError] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
-  // Enhanced debug logging for user context
-  useEffect(() => {
-    console.log("User context details:", {
-      name: user?.name,
-      surname: user?.surname,
-      email: user?.email,
-      id: user?.id,
-      addressId: user?.address?.id,
-      role: user?.role || 'Not specified', // This will show if role is missing
-      allProperties: user ? Object.keys(user) : 'User not loaded'
-    });
-    
-    // Additional check for role existence
-    if (user && !user.role) {
-      console.warn("Warning: User role is not defined in user context");
-    }
-  }, [user]);
-
-  // Detect screen size changes
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Fetch stats - now properly handles undefined addressId
-useEffect(() => {
-  const fetchStats = async () => {
-    const addressId = user?.address?.id;
+  useEffect(() => {
+    const fetchStats = async () => {
+      const addressId = user?.address?.id;
+      if (!addressId) return;
 
-    if (!addressId) {
-      console.warn("addressId is undefined, skipping API call");
-      return;
-    }
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await axios.get(`/api/dashboard/summary?addressId=${addressId}`);
+        setStats(response.data);
+      } catch (err) {
+        setError(err.response?.data?.message || "Failed to load dashboard data");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    setLoading(true);
-    setError(null);
-
-    try {
-      const response = await axios.get(
-        `/api/dashboard/summary?addressId=${addressId}`
-      );
-
-      console.log("API Response Data:", response.data);
-      setStats(response.data);
-
-    } catch (err) {
-      console.error("API Error Details:", {
-        message: err.message,
-        response: err.response?.data,
-        status: err.response?.status
-      });
-
-      setError(
-        err.response?.data?.message ||
-        err.message ||
-        "Failed to load dashboard data"
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchStats();
-}, [user?.address?.id]);
-  
-  
+    fetchStats();
+  }, [user?.address?.id]);
 
   if (loading) {
     return (
-      <div style={{ textAlign: "center", padding: "100px" }}>
-        <Spin size="large" tip="Loading dashboard..." />
+      <div style={{ textAlign: "center", padding: 100 }}>
+        <Spin size="large" />
       </div>
     );
   }
 
   if (error) {
-    return <Alert message={error} type="error" showIcon />;
+    return <Alert message={error} type="error" showIcon style={{ margin: 20 }} />;
   }
 
+  const statCards = [
+    {
+      title: "Total Members",
+      value: stats?.totalMembers ?? 0,
+      icon: <TeamOutlined />,
+      gradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    },
+    {
+      title: "Mentors",
+      value: stats?.totalMentors ?? 0,
+      icon: <UserOutlined />,
+      gradient: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+    },
+    {
+      title: "Secretaries",
+      value: stats?.totalSecretaries ?? 0,
+      icon: <UsergroupAddOutlined />,
+      gradient: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
+    },
+    {
+      title: "Nations",
+      value: stats?.totalNations ?? 0,
+      icon: <DeploymentUnitOutlined />,
+      gradient: "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)",
+    },
+    {
+      title: "Total Points",
+      value: stats?.totalPoints ?? 0,
+      icon: <TrophyOutlined />,
+      gradient: "linear-gradient(135deg, #fa709a 0%, #fee140 100%)",
+    },
+    {
+      title: "Leading Nation",
+      value: stats?.topNation || "—",
+      icon: <RiseOutlined />,
+      gradient: "linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)",
+      isText: true,
+    },
+  ];
+
   return (
-    <div
-      style={{
-        padding: isMobile ? "20px" : "60px",
-        backgroundColor: "#ffffff",
-        minHeight: "100vh",
-      }}
-    >      
-      {/* Top row stats */}
+    <div style={{ padding: isMobile ? 12 : 24, minHeight: "100vh" }}>
+      {/* Welcome Banner */}
+      <div
+        style={{
+          background: "linear-gradient(135deg, #1890ff, #722ed1)",
+          borderRadius: 20,
+          padding: isMobile ? "20px 16px" : "28px 32px",
+          marginBottom: 24,
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            top: -30,
+            right: -30,
+            width: 120,
+            height: 120,
+            borderRadius: "50%",
+            background: "rgba(255,255,255,0.08)",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            bottom: -20,
+            left: "40%",
+            width: 80,
+            height: 80,
+            borderRadius: "50%",
+            background: "rgba(255,255,255,0.05)",
+          }}
+        />
+        <Text style={{ color: "rgba(255,255,255,0.8)", fontSize: 14 }}>
+          Welcome back,
+        </Text>
+        <Title level={isMobile ? 4 : 3} style={{ color: "#fff", margin: "4px 0 0" }}>
+          {user?.name} {user?.surname} 👋
+        </Title>
+      </div>
+
+      {/* Stats Grid */}
       <Row gutter={[16, 16]}>
-        <Col xs={24} sm={12} md={8}>
-          <Card>
-            <Statistic
-              title="Total Members"
-              value={stats?.totalMembers ?? 0}
-              prefix={<TeamOutlined />}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} md={8}>
-          <Card>
-            <Statistic
-              title="Mentors"
-              value={stats?.totalMentors ?? 0}
-              prefix={<UserOutlined />}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} md={8}>
-          <Card>
-            <Statistic
-              title="Secretaries"
-              value={stats?.totalSecretaries ?? 0}
-              prefix={<UsergroupAddOutlined />}
-            />
-          </Card>
-        </Col>
+        {statCards.map((card, index) => (
+          <Col xs={12} sm={8} md={8} key={index}>
+            <Card
+              style={{
+                borderRadius: 16,
+                border: "none",
+                overflow: "hidden",
+                height: "100%",
+              }}
+              styles={{ body: { padding: isMobile ? 14 : 20 } }}
+            >
+              <div
+                style={{
+                  width: isMobile ? 36 : 44,
+                  height: isMobile ? 36 : 44,
+                  borderRadius: 12,
+                  background: card.gradient,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginBottom: 12,
+                  fontSize: isMobile ? 18 : 22,
+                  color: "#fff",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                }}
+              >
+                {card.icon}
+              </div>
+              <div style={{ fontSize: 12, color: "#888", marginBottom: 4 }}>
+                {card.title}
+              </div>
+              <div
+                style={{
+                  fontSize: card.isText ? (isMobile ? 14 : 16) : (isMobile ? 20 : 28),
+                  fontWeight: 700,
+                  color: "#1a1a1a",
+                  lineHeight: 1.2,
+                }}
+              >
+                {typeof card.value === "number" ? card.value.toLocaleString() : card.value}
+              </div>
+            </Card>
+          </Col>
+        ))}
       </Row>
 
-      {/* Middle row - hidden on mobile */}
-      {!isMobile && (
-        <Row gutter={[16, 16]} style={{ marginTop: 24 }}>
-          <Col span={8}>
-            <Card>
-              <Statistic
-                title="Total Nations"
-                value={stats?.totalNations ?? 0}
-                prefix={<DeploymentUnitOutlined />}
-              />
-            </Card>
-          </Col>
-          <Col span={8}>
-            <Card>
-              <Statistic
-                title="Total Points"
-                value={stats?.totalPoints ?? 0}
-                prefix={<TrophyOutlined />}
-              />
-            </Card>
-          </Col>
-          <Col span={8}>
-            <Card>
-              <Title level={5} style={{ marginBottom: 8 }}>🏆 Leading Nation</Title>
-              <Text strong style={{ fontSize: 18 }}>
-                {stats?.topNation || "Not available"}
-              </Text>
-            </Card>
-          </Col>
-        </Row>
-      )}
-
-      <div style={{ marginTop: 30 }}>
+      {/* Performance Overview */}
+      <div
+        style={{
+          marginTop: 24,
+          background: "#fff",
+          borderRadius: 16,
+          padding: isMobile ? 12 : 20,
+          boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
+        }}
+      >
         <NationPerformanceOverview />
       </div>
     </div>

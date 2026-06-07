@@ -1,23 +1,21 @@
-import React, { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext } from "react";
 import {
-  Card,
-  Row,
-  Col,
   Select,
   Modal,
   Button,
-  Divider,
   message,
   Spin,
   Alert,
-  Typography
+  Typography,
+  Avatar,
+  Tag,
+  Progress,
 } from "antd";
 import axios from "../utils/axios";
 import defaultImage from "../images/vyg.jpg";
 import UserContext from "../context/UserContext";
-import "../styles/NationPerformanceOverview.css";
+
 const baseURL = axios.defaults.baseURL;
-const { Option } = Select;
 const { Text } = Typography;
 
 const NationPerformanceOverview = () => {
@@ -28,6 +26,13 @@ const NationPerformanceOverview = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [nationSummaries, setNationSummaries] = useState({});
   const { user } = useContext(UserContext);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -35,13 +40,13 @@ const NationPerformanceOverview = () => {
         setLoading(true);
         setError(null);
 
-        const addressId = user?.address?.id || 37;
+        const addressId = user?.address?.id;
+        if (!addressId) return;
 
         const [nationsRes, performanceRes, memberStatsRes] = await Promise.all([
           axios.get(`/api/nations`),
           axios.get(`/api/points/summary/address/${addressId}`),
-          axios.get(`/api/nation-stats/member-stats/${addressId}`)
-          
+          axios.get(`/api/nation-stats/member-stats/${addressId}`),
         ]);
 
         const grouped = {};
@@ -60,12 +65,21 @@ const NationPerformanceOverview = () => {
           });
         }
 
+        // Calculate max points for progress bars
+        let maxPoints = 0;
+
         const enrichedNations = nationsRes.data.map((nation) => {
-          const memberStat = memberStatsRes.data.find(stat => stat.nationId === nation.id) || {
+          const memberStat = memberStatsRes.data.find((stat) => stat.nationId === nation.id) || {
             totalMembers: 0,
             totalMentors: 0,
-            totalSecretaries: 0
+            totalSecretaries: 0,
           };
+
+          const totalPoints = Object.values(grouped[nation.id]?.performanceByDate || {})
+            .flat()
+            .reduce((sum, e) => sum + (e.points || 0), 0);
+
+          if (totalPoints > maxPoints) maxPoints = totalPoints;
 
           return {
             ...nation,
@@ -74,16 +88,21 @@ const NationPerformanceOverview = () => {
               : defaultImage,
             performanceByDate: grouped[nation.id]?.performanceByDate || {},
             fallbackImage: defaultImage,
-            ...memberStat
+            totalPoints,
+            ...memberStat,
           };
         });
+
+        // Sort by total points descending
+        enrichedNations.sort((a, b) => b.totalPoints - a.totalPoints);
+        // Attach maxPoints for progress calculation
+        enrichedNations.forEach((n) => (n.maxPoints = maxPoints));
 
         setNations(enrichedNations);
         setNationSummaries(grouped);
       } catch (err) {
         console.error("Error fetching data:", err);
         setError(err.message || "Failed to load nation data");
-        message.error("Error loading nation performance");
       } finally {
         setLoading(false);
       }
@@ -100,7 +119,6 @@ const NationPerformanceOverview = () => {
 
   const getPerformanceByDate = (nation, date) => {
     if (!nation?.id || !date) return { totalPoints: 0, events: [] };
-
     const summary = nationSummaries[nation.id];
     const entries = summary?.performanceByDate?.[date] || [];
 
@@ -122,142 +140,218 @@ const NationPerformanceOverview = () => {
     };
   };
 
+  const getRankColor = (index) => {
+    if (index === 0) return "#faad14";
+    if (index === 1) return "#8c8c8c";
+    if (index === 2) return "#d48806";
+    return "#1890ff";
+  };
+
+  const getRankEmoji = (index) => {
+    if (index === 0) return "🥇";
+    if (index === 1) return "🥈";
+    if (index === 2) return "🥉";
+    return `#${index + 1}`;
+  };
+
   if (error) {
-    return (
-      <Alert
-        message="Error Loading Nation Performance"
-        description={
-          <>
-            <Text>{error}</Text>
-            <br />
-            <Text type="secondary">
-              Address ID used: {user?.address?.id || '37 (fallback)'}
-            </Text>
-          </>
-        }
-        type="error"
-        showIcon
-        style={{ margin: 16 }}
-      />
-    );
+    return <Alert message="Error loading performance data" type="error" showIcon style={{ margin: 16 }} />;
   }
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', padding: 40 }}>
+      <div style={{ display: "flex", justifyContent: "center", padding: 40 }}>
         <Spin size="large" />
       </div>
     );
   }
 
   if (!nations.length) {
-    return (
-      <Alert
-        message="No Nation Data Available"
-        description="The server returned no nation performance data."
-        type="info"
-        showIcon
-        style={{ margin: 16 }}
-      />
-    );
+    return <Alert message="No nation data available" type="info" showIcon style={{ margin: 16 }} />;
   }
 
   return (
-    <div className="overview-container">
-      <Row gutter={[16, 16]}>
-        {nations.map((nation) => {
-          const totalPoints = Object.values(nation.performanceByDate)
-            .flat()
-            .reduce((sum, e) => sum + (e.points || 0), 0);
+    <div>
+      {/* Section header */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+        <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>🏆 Nation Performance</h3>
+        <Tag color="blue">{nations.length} Nations</Tag>
+      </div>
+
+      {/* Nation cards - horizontal scroll on mobile, grid on desktop */}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 12,
+        }}
+      >
+        {nations.map((nation, index) => {
           const dateOptions = getDateOptions(nation);
+          const progressPercent = nation.maxPoints > 0 ? (nation.totalPoints / nation.maxPoints) * 100 : 0;
 
           return (
-            <Col key={nation.id} xs={24} sm={12} md={8} lg={6}>
-              <Card
-                hoverable
-                cover={
-                  <img
-                    alt={nation.nation}
-                    src={nation.imageUrl}
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = nation.fallbackImage;
-                    }}
-                    style={{ height: 160, objectFit: 'cover' }}
-                  />
-                }
-                actions={[
-                  <Button
-                    type="link"
-                    onClick={() => {
-                      setVisibleNation(nation);
-                      setSelectedDate(dateOptions[0] || null);
-                    }}
-                    disabled={!dateOptions.length}
-                  >
-                    {dateOptions.length ? 'View Details' : 'No Data'}
-                  </Button>
-                ]}
+            <div
+              key={nation.id}
+              onClick={() => {
+                setVisibleNation(nation);
+                setSelectedDate(dateOptions[0] || null);
+              }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: isMobile ? 10 : 16,
+                padding: isMobile ? "12px 10px" : "14px 16px",
+                borderRadius: 14,
+                background: index === 0 ? "linear-gradient(135deg, #fff9e6, #fffbe6)" : "#fafafa",
+                border: index === 0 ? "1px solid #ffe58f" : "1px solid #f0f0f0",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+                boxShadow: index === 0 ? "0 2px 8px rgba(250, 173, 20, 0.15)" : "none",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateX(4px)";
+                e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.08)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateX(0)";
+                e.currentTarget.style.boxShadow = index === 0 ? "0 2px 8px rgba(250, 173, 20, 0.15)" : "none";
+              }}
+            >
+              {/* Rank */}
+              <div
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 8,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: index < 3 ? 16 : 12,
+                  fontWeight: 700,
+                  color: getRankColor(index),
+                  background: index < 3 ? "rgba(250,173,20,0.1)" : "rgba(24,144,255,0.06)",
+                  flexShrink: 0,
+                }}
               >
-                <Card.Meta
-                  title={nation.nation}
-                  description={
-                    <>
-                      <Text strong>Total Points:</Text> {totalPoints.toLocaleString()}
-                      <br />
-                      <Text strong>Members:</Text> {nation.totalMembers}
-                      {" | "}
-                      <Text strong>Mentors:</Text> {nation.totalMentors}
-                      {" | "}
-                      <Text strong>Secretaries:</Text> {nation.totalSecretaries}
-                      <br />
-                      <Text strong>Records:</Text> {dateOptions.length}
-                    </>
-                  }
+                {getRankEmoji(index)}
+              </div>
+
+              {/* Nation logo */}
+              <Avatar
+                src={nation.imageUrl}
+                size={isMobile ? 36 : 42}
+                shape="square"
+                style={{ borderRadius: 10, flexShrink: 0 }}
+                onError={() => true}
+              />
+
+              {/* Info */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                  <span style={{ fontWeight: 600, fontSize: 14, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {nation.nation}
+                  </span>
+                  <span style={{ fontWeight: 700, fontSize: 14, color: getRankColor(index), flexShrink: 0, marginLeft: 8 }}>
+                    {nation.totalPoints.toLocaleString()} pts
+                  </span>
+                </div>
+                <Progress
+                  percent={progressPercent}
+                  showInfo={false}
+                  size="small"
+                  strokeColor={getRankColor(index)}
+                  style={{ marginBottom: 4 }}
                 />
-              </Card>
-            </Col>
+                <div style={{ fontSize: 11, color: "#888" }}>
+                  {nation.totalMembers} members • {nation.totalMentors} mentors • {dateOptions.length} records
+                </div>
+              </div>
+            </div>
           );
         })}
-      </Row>
+      </div>
 
+      {/* Detail Modal */}
       <Modal
-        title={visibleNation?.nation || 'Nation Performance'}
+        title={
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <Avatar
+              src={visibleNation?.imageUrl}
+              size={36}
+              shape="square"
+              style={{ borderRadius: 10 }}
+            />
+            <span>{visibleNation?.nation || "Nation Performance"}</span>
+          </div>
+        }
         open={!!visibleNation}
         onCancel={() => setVisibleNation(null)}
         footer={null}
-        width={700}
+        width={isMobile ? "95%" : 600}
       >
         {visibleNation && getDateOptions(visibleNation).length > 0 ? (
           <>
             <Select
-              style={{ width: '100%', marginBottom: 20 }}
+              style={{ width: "100%", marginBottom: 20 }}
               value={selectedDate}
               onChange={setSelectedDate}
-              options={getDateOptions(visibleNation).map(date => ({
+              options={getDateOptions(visibleNation).map((date) => ({
                 value: date,
-                label: new Date(date).toLocaleDateString()
+                label: new Date(date).toLocaleDateString("en-ZA", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                }),
               }))}
             />
 
-            <Divider orientation="left">Event Breakdown</Divider>
-            {getPerformanceByDate(visibleNation, selectedDate).events.map((event, idx) => (
-              <div key={idx} style={{ marginBottom: 8 }}>
-                <Text strong>{event.eventName}:</Text> {event.people} people, {event.points} points
-              </div>
-            ))}
+            <div style={{ marginBottom: 16 }}>
+              <Text strong style={{ fontSize: 13, color: "#888" }}>EVENT BREAKDOWN</Text>
+            </div>
 
-            <Divider />
-            <Text strong>Total Points: </Text>
-            {getPerformanceByDate(visibleNation, selectedDate).totalPoints.toLocaleString()}
+            {getPerformanceByDate(visibleNation, selectedDate).events.length > 0 ? (
+              getPerformanceByDate(visibleNation, selectedDate).events.map((event, idx) => (
+                <div
+                  key={idx}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    padding: "10px 12px",
+                    marginBottom: 8,
+                    borderRadius: 10,
+                    background: "#f9f9f9",
+                    border: "1px solid #f0f0f0",
+                  }}
+                >
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: 13 }}>{event.eventName}</div>
+                    <div style={{ fontSize: 11, color: "#888" }}>{event.people} people</div>
+                  </div>
+                  <Tag color="blue" style={{ fontWeight: 600 }}>{event.points} pts</Tag>
+                </div>
+              ))
+            ) : (
+              <Text type="secondary">No events for this date</Text>
+            )}
+
+            <div
+              style={{
+                marginTop: 16,
+                padding: "12px 16px",
+                borderRadius: 12,
+                background: "linear-gradient(135deg, #e6f7ff, #f0f5ff)",
+                textAlign: "center",
+              }}
+            >
+              <Text strong style={{ fontSize: 16 }}>
+                Total: {getPerformanceByDate(visibleNation, selectedDate).totalPoints.toLocaleString()} points
+              </Text>
+            </div>
           </>
         ) : (
-          <Alert
-            message="No Detailed Data"
-            description="No performance records available for this nation."
-            type="info"
-            showIcon
-          />
+          <Alert message="No detailed data available for this nation." type="info" showIcon />
         )}
       </Modal>
     </div>

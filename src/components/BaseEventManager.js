@@ -123,11 +123,18 @@ const BaseEventManager = () => {
   ];
 
   return (
-    <div className="base-event-wrapper">
-      <div className="base-event-container">
-        <Button type="primary" style={{ marginBottom: 16 }} onClick={() => openModal()}>
-          ➕ Add New Event
-        </Button>
+    <div className="page-wrapper">
+      <div className="page-header">
+        <h2>Event Management</h2>
+        <p>Manage base events and their default points</p>
+      </div>
+
+      <div className="page-card">
+        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16 }}>
+          <Button type="primary" onClick={() => openModal()} style={{ borderRadius: 10 }}>
+            ➕ Add New Event
+          </Button>
+        </div>
 
         {successMessage && (
           <Alert

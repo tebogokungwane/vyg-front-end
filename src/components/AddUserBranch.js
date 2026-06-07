@@ -104,7 +104,13 @@ const AddUserBranch = () => {
   }
 
   return (
-    <div className="add-user-container" style={{ paddingTop: "60px" }}>
+    <div className="page-wrapper">
+      <div className="page-header">
+        <h2>Add User for Branch</h2>
+        <p>Register a new mentor, secretary, or PR for a branch</p>
+      </div>
+
+      <div className="page-card">
       <Form
         form={form}
         layout="vertical"
@@ -241,6 +247,7 @@ const AddUserBranch = () => {
           </Button>
         </Form.Item>
       </Form>
+      </div>
     </div>
   );
 };

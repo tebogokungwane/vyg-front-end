@@ -138,7 +138,6 @@ const Points = () => {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        withCredentials: true
       });
 
 

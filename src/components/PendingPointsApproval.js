@@ -152,7 +152,7 @@ const PendingPointsApproval = () => {
     {
       title: 'Actions',
       key: 'action',
-      width: 120,
+      width: 100,
       render: (_, record) => (
         <Button 
           type="primary" 
@@ -173,16 +173,18 @@ const PendingPointsApproval = () => {
       render: (name) => <Tag color="blue">{name}</Tag>
     },
     {
-      title: 'Address',
-      dataIndex: 'fullAddress',
-      key: 'fullAddress',
-      render: (address) => <Text>{address}</Text>
-    },
-    {
       title: 'Nation',
       dataIndex: 'nationName',
       key: 'nationName',
       render: (name) => <Tag color="green">{name}</Tag>
+    },
+    {
+      title: 'Total Points',
+      key: 'totalPoints',
+      render: (_, record) => {
+        const total = record.records.reduce((sum, r) => sum + (r.totalPoints || (r.numberOfPeople * r.defaultPoints) || 0), 0);
+        return <Tag color="orange" style={{ fontWeight: 700 }}>{total.toLocaleString()}</Tag>;
+      }
     },
     {
       title: 'Captured By',
@@ -198,25 +200,31 @@ const PendingPointsApproval = () => {
   ];
 
   return (
-    <div style={{ overflowX: 'auto', padding: '50px 20px 20px'}}>
-    <Table
-      columns={columns}
-      dataSource={groupedPoints}
-      loading={loading}
-      rowKey="key"
-      bordered
-      pagination={{ pageSize: 10 }}
-      scroll={{ x: 'max-content' }}
-      size="middle"
-      locale={{
-        emptyText: (
-          <Empty 
-            description={loading ? "Loading..." : "No pending points to approve"} 
-            image={Empty.PRESENTED_IMAGE_SIMPLE}
-          />
-        )
-      }}
-    />
+    <div className="page-wrapper">
+      <div className="page-header">
+        <h2>Pending Points Approval</h2>
+        <p>{groupedPoints.length} submissions waiting for review</p>
+      </div>
+
+      <div className="page-card modern-table">
+        <Table
+          columns={columns}
+          dataSource={groupedPoints}
+          loading={loading}
+          rowKey="key"
+          pagination={{ pageSize: 10 }}
+          scroll={{ x: 'max-content' }}
+          size="middle"
+          locale={{
+            emptyText: (
+              <Empty 
+                description={loading ? "Loading..." : "No pending points to approve"} 
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+              />
+            )
+          }}
+        />
+      </div>
 
       <Modal
         title="Review Point Submission"
@@ -231,11 +239,13 @@ const PendingPointsApproval = () => {
               <Descriptions.Item label="Branch">
                 <Tag color="blue">{selectedGroup.formattedAddressName}</Tag>
               </Descriptions.Item>
-              <Descriptions.Item label="Address">
-                <Text>{selectedGroup.fullAddress}</Text>
-              </Descriptions.Item>
               <Descriptions.Item label="Nation">
                 <Tag color="green">{selectedGroup.nationName}</Tag>
+              </Descriptions.Item>
+              <Descriptions.Item label="Total Points">
+                <Tag color="orange" style={{ fontWeight: 700, fontSize: 14 }}>
+                  {selectedGroup.records.reduce((sum, r) => sum + (r.totalPoints || (r.numberOfPeople * r.defaultPoints) || 0), 0).toLocaleString()}
+                </Tag>
               </Descriptions.Item>
               <Descriptions.Item label="Captured By">
                 {selectedGroup.capturedBy}

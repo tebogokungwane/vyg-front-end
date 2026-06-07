@@ -34,6 +34,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, setPageTitle, setPageIcon, user
     localStorage.removeItem("token");
     setUser(null);
     navigate("/");
+    window.location.reload();
   };
 
   useEffect(() => {
@@ -59,16 +60,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, setPageTitle, setPageIcon, user
     },
     { key: "nation-points", icon: <AppstoreOutlined style={{ color: "#722ed1" }} />, label: "Nations Standings" },
     { key: "nation-performance-overview", icon: <LineChartOutlined style={{ color: "#13c2c2" }} />, label: "Performance Overview" },
-    {
-      key: "charts",
-      icon: <BarChartOutlined style={{ color: "#52c41a" }} />,
-      label: "Charts",
-      children: [
-        { key: "pie-chart", icon: <PieChartOutlined style={{ color: "#eb2f96" }} />, label: "Pie Chart" },
-        { key: "bar-chart", icon: <BarChartOutlined style={{ color: "#52c41a" }} />, label: "Bar Chart" },
-        { key: "line-chart", icon: <LineChartOutlined style={{ color: "#1890ff" }} />, label: "Line Chart" },
-      ],
-    },
+    { key: "charts", icon: <BarChartOutlined style={{ color: "#52c41a" }} />, label: "Analytics" },
     {
       key: "member",
       icon: <TeamOutlined style={{ color: "#2f54eb" }} />,
@@ -76,11 +68,24 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, setPageTitle, setPageIcon, user
       children: [
         { key: "add-mentor", icon: <TeamOutlined style={{ color: "#2f54eb" }} />, label: "Add User" },
         { key: "view-all-members", icon: <EyeOutlined style={{ color: "#13c2c2" }} />, label: "View All Member" },
-        { key: "view-mentors", icon: <EyeOutlined style={{ color: "#722ed1" }} />, label: "View Mentors" },
+        { key: "view-members", icon: <EyeOutlined style={{ color: "#722ed1" }} />, label: "View Members" },
+        { key: "member-hierarchy", icon: <TeamOutlined style={{ color: "#fa8c16" }} />, label: "Team Structure" },
       ],
     },
     { key: "school", icon: <BookOutlined style={{ color: "#fa8c16" }} />, label: "School" },
+    { key: "projects", icon: <AppstoreOutlined style={{ color: "#13c2c2" }} />, label: "Projects" },
     { key: "profile", icon: <ProfileOutlined style={{ color: "#597ef7" }} />, label: "Profile" },
+    {
+      key: "upload-images",
+      icon: <PictureOutlined style={{ color: "#eb2f96" }} />,
+      label: "Image Management",
+      children: [
+        { key: "upload-logo", icon: <PictureOutlined style={{ color: "#eb2f96" }} />, label: "Upload Logo" },
+        { key: "upload-favicon", icon: <PictureOutlined style={{ color: "#fa541c" }} />, label: "Upload Favicon" },
+        { key: "upload-background", icon: <PictureOutlined style={{ color: "#722ed1" }} />, label: "Upload Background" },
+        { key: "manage-social-media", icon: <AppstoreOutlined style={{ color: "#1890ff" }} />, label: "Social Media" },
+      ],
+    },
     {
       key: "settings",
       icon: <SettingOutlined style={{ color: "#595959" }} />,
@@ -90,19 +95,9 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, setPageTitle, setPageIcon, user
         { key: "event-management", icon: <StarOutlined style={{ color: "#faad14" }} />, label: "Event Management" },
         { key: "management-church-address", icon: <EnvironmentOutlined style={{ color: "#52c41a" }} />, label: "Manage Church Address" },
         { key: "setting-nations", icon: <AppstoreOutlined style={{ color: "#722ed1" }} />, label: "Manage Nation" },
+        { key: "manage-projects", icon: <AppstoreOutlined style={{ color: "#13c2c2" }} />, label: "Manage Projects" },
+        { key: "theme-toggle", icon: <SettingOutlined style={{ color: "#faad14" }} />, label: "Light / Dark Mode" },
         { key: "active-logs", icon: <DatabaseOutlined style={{ color: "#13c2c2" }} />, label: "Active Logs" },
-      ],
-    },
-    {
-      key: "upload-images",
-      icon: <PictureOutlined style={{ color: "#eb2f96" }} />,
-      label: "Upload Image",
-      children: [
-        { key: "upload-logo", icon: <PictureOutlined style={{ color: "#eb2f96" }} />, label: "Upload Logo" },
-        { key: "upload-favicon", icon: <PictureOutlined style={{ color: "#fa541c" }} />, label: "Upload Favicon" },
-        { key: "upload-background", icon: <PictureOutlined style={{ color: "#722ed1" }} />, label: "Upload Background" },
-        { key: "manage-social-media", icon: <AppstoreOutlined style={{ color: "#1890ff" }} />, label: "Social Media" },
-        { key: "theme-toggle", icon: <SettingOutlined style={{ color: "#595959" }} />, label: "Light / Dark Mode" },
       ],
     },
   ];
@@ -127,7 +122,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, setPageTitle, setPageIcon, user
 
     if (user?.role?.toLowerCase() === "member") {
       return allMenuItems.filter(item =>
-        ["dashboard", "charts", "nation-points", "nation-performance-overview", "profile"].includes(item.key)
+        ["dashboard", "charts", "nation-points", "nation-performance-overview", "profile", "projects"].includes(item.key)
       );
     }
 
@@ -211,27 +206,28 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, setPageTitle, setPageIcon, user
         </div>
       )}
 
-      <div className="sidebar-logout" onMouseDown={(e) => e.stopPropagation()}>
-        {user && (
-          <div style={{ padding: "0 12px 8px", fontSize: 13, color: "#595959" }}>
+      {isMobile && user && (
+        <div style={{ padding: "8px 16px", borderTop: "1px solid #f0f0f0" }}>
+          <Button
+            type="text"
+            danger
+            icon={<LogoutOutlined />}
+            onClick={handleLogout}
+            block
+            style={{ textAlign: "left", height: 40, fontWeight: 500 }}
+          >
+            Logout
+          </Button>
+        </div>
+      )}
+
+      {!isMobile && user && (
+        <div className="sidebar-user-info">
+          <span style={{ fontSize: 13, color: "#595959" }}>
             Logged in as: <strong>{user.name} {user.surname}</strong>
-          </div>
-        )}
-        <Button
-          type="text"
-          danger
-          icon={<LogoutOutlined />}
-          onMouseDown={(e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            handleLogout();
-          }}
-          block
-          style={{ textAlign: "left", height: 40 }}
-        >
-          Logout
-        </Button>
-      </div>
+          </span>
+        </div>
+      )}
     </div>
   );
 };

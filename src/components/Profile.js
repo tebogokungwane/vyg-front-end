@@ -1,20 +1,15 @@
-// src/components/Profile.js
-
 import React, { useEffect, useState, useContext } from "react";
 import {
   Avatar,
   Input,
   Select,
-  Row,
-  Col,
   message,
-  Typography,
   Button,
   Alert,
   Modal,
   Form,
   Progress,
-  Spin
+  Spin,
 } from "antd";
 import {
   MailOutlined,
@@ -25,13 +20,14 @@ import {
   TeamOutlined,
   LockOutlined,
   EditOutlined,
+  CheckOutlined,
+  CloseOutlined,
 } from "@ant-design/icons";
 import axios from "../utils/axios";
 import UserContext from "../context/UserContext";
 import "../styles/profile.css";
 
 const { Option } = Select;
-const { Title } = Typography;
 
 const validatePasswordStrength = (password) => {
   const strongPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+[\]{}|;:',.<>?]).{8,}$/;
@@ -55,7 +51,6 @@ const Profile = () => {
   const [addresses, setAddresses] = useState([]);
   const [editingField, setEditingField] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
-  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [passwordForm] = Form.useForm();
   const [isPasswordModalVisible, setIsPasswordModalVisible] = useState(false);
   const [passwordAlert, setPasswordAlert] = useState(null);
@@ -69,29 +64,24 @@ const Profile = () => {
         setLoading(true);
         const [profileResponse, addressesResponse] = await Promise.all([
           axios.get(`/api/member/${contextUser.id}`, {
-            headers: { Authorization: `Bearer ${contextUser.token}` }
+            headers: { Authorization: `Bearer ${contextUser.token}` },
           }),
-          axios.get( `/api/addresses`, {
-            headers: { Authorization: `Bearer ${contextUser.token}` }
-          })
+          axios.get(`/api/addresses`, {
+            headers: { Authorization: `Bearer ${contextUser.token}` },
+          }),
         ]);
-  
-        console.log("📦 Profile Response Data:", profileResponse.data);
-        console.log("🏠 Profile Address:", profileResponse.data.address);
-  
         setProfileData(profileResponse.data);
         setAddresses(addressesResponse.data);
       } catch (error) {
-        console.error("❌ Error fetching profile data:", error);
+        console.error("Error fetching profile data:", error);
         message.error("Failed to load profile data");
       } finally {
         setLoading(false);
       }
     };
-  
+
     if (contextUser?.id) fetchProfileData();
   }, [contextUser]);
-  
 
   const handleChange = (field, value) => {
     setHasChanges(true);
@@ -101,40 +91,25 @@ const Profile = () => {
     }));
   };
 
-  const validateFields = () => {
-    if (!/^\d{10}$/.test(profileData.cellNumber)) {
-      message.error("Cell number must be 10 digits (SA format).");
-      return false;
-    }
-    return true;
-  };
-
   const handleSave = async () => {
-    if (!validateFields() || !profileData) return;
-
-    const payload = {
-      cellNumber: profileData.cellNumber,
-      addressId: profileData.address?.id,
-    };
+    if (!profileData) return;
+    if (!/^\d{10}$/.test(profileData.cellNumber)) {
+      message.error("Cell number must be 10 digits.");
+      return;
+    }
 
     try {
       const response = await axios.put(
         `/api/member/updateMember/${contextUser.id}`,
-        payload,
-        {
-          headers: { Authorization: `Bearer ${contextUser.token}` }
-        }
+        { cellNumber: profileData.cellNumber, addressId: profileData.address?.id },
+        { headers: { Authorization: `Bearer ${contextUser.token}` } }
       );
-
-      setShowSuccessAlert(true);
-      setTimeout(() => setShowSuccessAlert(false), 3000);
-      message.success("Profile updated successfully!");
+      message.success("Profile updated!");
       setEditingField(null);
       setHasChanges(false);
       setIsEditing(false);
-      setProfileData(prev => ({ ...prev, ...response.data }));
+      setProfileData((prev) => ({ ...prev, ...response.data }));
     } catch (err) {
-      console.error("Update failed:", err);
       message.error(err.response?.data?.message || "Failed to update profile.");
     }
   };
@@ -155,17 +130,12 @@ const Profile = () => {
         setPasswordAlert({ type: "error", message: "Current password is incorrect." });
         return;
       }
-
       if (newPassword !== confirmPassword) {
         setPasswordAlert({ type: "error", message: "New passwords do not match." });
         return;
       }
-
       if (!validatePasswordStrength(newPassword)) {
-        setPasswordAlert({
-          type: "error",
-          message: "Password too weak. Use at least 8 characters with uppercase, lowercase, number, and special character.",
-        });
+        setPasswordAlert({ type: "error", message: "Password too weak." });
         return;
       }
 
@@ -176,134 +146,128 @@ const Profile = () => {
       );
 
       if (updateResponse.data.success) {
-        setPasswordAlert({ type: "success", message: "Password updated successfully!" });
+        setPasswordAlert({ type: "success", message: "Password updated!" });
         setTimeout(() => {
           setIsPasswordModalVisible(false);
           passwordForm.resetFields();
           setPasswordStrength(0);
         }, 1500);
       } else {
-        setPasswordAlert({ type: "error", message: updateResponse.data.message || "Failed to update password." });
+        setPasswordAlert({ type: "error", message: updateResponse.data.message || "Failed." });
       }
     } catch (err) {
-      console.error("Password update error:", err);
       setPasswordAlert({ type: "error", message: err.response?.data?.message || "Failed to update password." });
     } finally {
       setIsUpdatingPassword(false);
     }
   };
 
-  const handlePasswordChange = (e) => {
-    setPasswordStrength(getPasswordStrength(e.target.value));
-  };
-
-  const renderEditableField = (field, value, icon, type = "text", options = []) => {
-    if (!isEditing && (field !== "cellNumber" && field !== "address")) {
-      return <p>{icon} {value || "-"}</p>;
-    }
-
-    return editingField === field ? (
-      type === "select" ? (
-        <Select
-          value={value?.id || value}
-          onChange={(val) => handleChange(field, val)}
-          onBlur={() => setEditingField(null)}
-          autoFocus
-          style={{ width: "100%" }}
-          showSearch
-          optionFilterProp="children"
-        >
-          {options.map((opt) => (
-            <Option key={opt.id} value={opt.id}>
-              {`${opt.fullAddress} (${opt.branch}, ${opt.province})`}
-            </Option>
-          ))}
-        </Select>
-      ) : (
-        <Input
-          value={value}
-          onChange={(e) => handleChange(field, e.target.value)}
-          onBlur={() => setEditingField(null)}
-          onPressEnter={() => setEditingField(null)}
-          autoFocus
-        />
-      )
-    ) : (
-      <p>
-        {icon}{" "}
-        <span
-          onClick={() => isEditing && setEditingField(field)}
-          style={{ cursor: isEditing ? "pointer" : "default", wordBreak: "break-word" }}
-        >
-          {field === "address" && value
-            ? `${value.fullAddress} (${value.branch}, ${value.province})`
-            : value || "-"}
-        </span>
-      </p>
-    );
-  };
-
   if (loading) {
-    return (
-      <div className="center-loader">
-        <Spin size="large" />
-      </div>
-    );
+    return <div className="center-loader"><Spin size="large" /></div>;
   }
 
   if (!profileData) {
-    return <p style={{ textAlign: "center" }}>Failed to load profile data</p>;
+    return <p style={{ textAlign: "center", padding: 40 }}>Failed to load profile data</p>;
   }
+
+  const renderField = (label, value, icon, iconColor, field, type = "text") => (
+    <div className="profile-info-row">
+      <div className={`profile-info-icon ${iconColor}`}>{icon}</div>
+      <div className="profile-info-content">
+        <div className="profile-info-label">{label}</div>
+        {isEditing && editingField === field ? (
+          type === "select" ? (
+            <Select
+              value={profileData.address?.id}
+              onChange={(val) => { handleChange("address", val); setEditingField(null); }}
+              style={{ width: "100%" }}
+              size="small"
+              showSearch
+              optionFilterProp="children"
+            >
+              {addresses.map((opt) => (
+                <Option key={opt.id} value={opt.id}>
+                  {`${opt.fullAddress} (${opt.branch})`}
+                </Option>
+              ))}
+            </Select>
+          ) : (
+            <Input
+              value={value}
+              onChange={(e) => handleChange(field, e.target.value)}
+              onBlur={() => setEditingField(null)}
+              onPressEnter={() => setEditingField(null)}
+              size="small"
+              autoFocus
+            />
+          )
+        ) : (
+          <div
+            className={`profile-info-value ${isEditing && field ? "editable" : ""}`}
+            onClick={() => isEditing && field && setEditingField(field)}
+          >
+            {field === "address" && value
+              ? `${value.fullAddress} (${value.branch})`
+              : value || "—"}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 
   return (
     <div className="profile-wrapper">
       <div className="profile-container">
-        {showSuccessAlert && (
-          <Alert message="Profile updated successfully!" type="success" showIcon style={{ marginBottom: 16 }} />
-        )}
+        {/* Hero Section */}
+        <div className="profile-hero">
+          <Avatar size={90} icon={<UserOutlined />} style={{ backgroundColor: "rgba(255,255,255,0.2)" }} />
+          <div className="profile-hero-name">{profileData.name} {profileData.surname}</div>
+          <div className="profile-hero-role">{profileData.role}</div>
+          <div className="profile-hero-status">
+            {profileData.isActive ? "✅ Active" : "❌ Inactive"}
+          </div>
+        </div>
 
-        <Row gutter={[24, 24]} align="middle">
-          <Col xs={24} sm={8} md={6} className="profile-avatar-col">
-            <Avatar size={100} icon={<UserOutlined />} />
-            <Title level={5} className="profile-role">{profileData.role}</Title>
-          </Col>
-          <Col xs={24} sm={16} md={18}>
-            <Title level={4} className="profile-name">
-              {profileData.name} {profileData.surname}
-            </Title>
+        {/* Personal Info */}
+        <div className="profile-info-card">
+          <h4>Personal Information</h4>
+          {renderField("Email", profileData.email, <MailOutlined />, "blue", null)}
+          {renderField("Phone", profileData.cellNumber, <PhoneOutlined />, "green", "cellNumber")}
+          {renderField("Gender", profileData.gender, <UserOutlined />, "purple", null)}
+          {renderField("Nation", profileData.nation?.nation || "Unassigned", <TeamOutlined />, "orange", null)}
+        </div>
 
-            {renderEditableField("email", profileData.email, <MailOutlined />)}
-            {renderEditableField("cellNumber", profileData.cellNumber, <PhoneOutlined />)}
-            {renderEditableField("gender", profileData.gender, <UserOutlined />)}
-            {renderEditableField("residentialAddress", profileData.residentialAddress, <HomeOutlined />)}
-            <p><TeamOutlined /> Nation: {profileData.nation?.nation || "Unassigned"}</p>
-            <p><b>Status:</b> {profileData.isActive ? "✅ Active" : "❌ Inactive"}</p>
+        {/* Location Info */}
+        <div className="profile-info-card">
+          <h4>Location</h4>
+          {renderField("Residential Address", profileData.residentialAddress, <HomeOutlined />, "pink", null)}
+          {renderField("Church Branch", profileData.address, <EnvironmentOutlined />, "blue", "address", "select")}
+        </div>
 
-              <div className="profile-actions">
-                {!isEditing ? (
-                  <Button icon={<EditOutlined />} onClick={() => setIsEditing(true)}>
-                    Edit
-                  </Button>
-                ) : (
-                  <>
-                    <Button type="primary" onClick={handleSave} disabled={!hasChanges}>
-                      Save Changes
-                    </Button>
-                    <Button onClick={() => {
-                      setIsEditing(false);
-                      setEditingField(null);
-                    }}>
-                      Cancel
-                    </Button>
-                  </>
-                )}
-                <Button icon={<LockOutlined />} onClick={() => setIsPasswordModalVisible(true)}>
-                  Change Password
+        {/* Actions */}
+        <div className="profile-info-card">
+          <div className="profile-actions">
+            {!isEditing ? (
+              <Button type="primary" icon={<EditOutlined />} onClick={() => setIsEditing(true)} block>
+                Edit Profile
+              </Button>
+            ) : (
+              <>
+                <Button type="primary" icon={<CheckOutlined />} onClick={handleSave} disabled={!hasChanges}>
+                  Save
                 </Button>
-              </div>
-          </Col>
-        </Row>
+                <Button icon={<CloseOutlined />} onClick={() => { setIsEditing(false); setEditingField(null); }}>
+                  Cancel
+                </Button>
+              </>
+            )}
+            <Button icon={<LockOutlined />} onClick={() => setIsPasswordModalVisible(true)} block={!isEditing}>
+              Change Password
+            </Button>
+          </div>
+        </div>
 
+        {/* Password Modal */}
         <Modal
           title="Change Password"
           open={isPasswordModalVisible}
@@ -316,39 +280,25 @@ const Profile = () => {
           onOk={() => passwordForm.submit()}
           okText={isUpdatingPassword ? "Updating..." : "Update"}
           okButtonProps={{ loading: isUpdatingPassword }}
-          cancelButtonProps={{ disabled: isUpdatingPassword }}
         >
           {passwordAlert && (
-            <Alert
-              type={passwordAlert.type}
-              message={passwordAlert.message}
-              showIcon
-              style={{ marginBottom: 12 }}
-            />
+            <Alert type={passwordAlert.type} message={passwordAlert.message} showIcon style={{ marginBottom: 12 }} />
           )}
           <Form form={passwordForm} layout="vertical" onFinish={handlePasswordUpdate}>
             <Form.Item name="currentPassword" label="Current Password" rules={[{ required: true }]}>
               <Input.Password />
             </Form.Item>
             <Form.Item name="newPassword" label="New Password" rules={[{ required: true }]}>
-              <Input.Password onChange={handlePasswordChange} />
+              <Input.Password onChange={(e) => setPasswordStrength(getPasswordStrength(e.target.value))} />
             </Form.Item>
-            <Progress percent={passwordStrength} status={
-              passwordStrength < 40 ? "exception" : passwordStrength < 80 ? "active" : "success"
-            } showInfo={false} style={{ marginBottom: 16 }} />
+            <Progress
+              percent={passwordStrength}
+              status={passwordStrength < 40 ? "exception" : passwordStrength < 80 ? "active" : "success"}
+              showInfo={false}
+              style={{ marginBottom: 16 }}
+            />
             <Form.Item name="confirmPassword" label="Confirm Password" rules={[{ required: true }]}>
               <Input.Password />
-            </Form.Item>
-            <Form.Item>
-              <small style={{ color: "#888" }}>
-                Password must include:
-                <ul>
-                  <li>At least 8 characters</li>
-                  <li>Uppercase and lowercase letters</li>
-                  <li>At least one number</li>
-                  <li>At least one special character</li>
-                </ul>
-              </small>
             </Form.Item>
           </Form>
         </Modal>

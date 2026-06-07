@@ -220,28 +220,15 @@ const NationPerformance = () => {
   };
 
   return (
-    <div
-      style={{
-        padding: isMobile ? "10px" : "40px 90px",
-        backgroundColor: "#f5f5f5",
-        minHeight: "100vh",
-      }}
-    >
+    <div className="page-wrapper">
       {/* Header */}
-      <div
-        style={{
-          textAlign: "center",
-          marginBottom: 24,
-          padding: "20px",
-          background: "#fff",
-          borderRadius: 8,
-          boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-        }}
-      >
-        <h2 style={{ margin: "0 0 16px 0", fontSize: isMobile ? 18 : 24 }}>
-          🏆 Nation League Standings
-        </h2>
-        <div style={{ display: "flex", justifyContent: "center", gap: 10, flexWrap: "wrap" }}>
+      <div className="page-header">
+        <h2>🏆 Nation League Standings</h2>
+        <p>Track nation performance rankings</p>
+      </div>
+
+      <div className="page-card">
+        <div style={{ display: "flex", justifyContent: "center", gap: 10, flexWrap: "wrap", marginBottom: 16 }}>
           <Select
             style={{ width: 140 }}
             value={viewMode}
@@ -270,14 +257,7 @@ const NationPerformance = () => {
       </div>
 
       {/* League Table */}
-      <div
-        style={{
-          background: "#fff",
-          borderRadius: 8,
-          overflow: "hidden",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-        }}
-      >
+      <div className="page-card modern-table">
         <Table
           dataSource={nationsInfo}
           columns={columns}

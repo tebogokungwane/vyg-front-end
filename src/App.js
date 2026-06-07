@@ -41,10 +41,15 @@ import UploadFavicon from "./components/UploadFavicon";
 import UploadBackground from "./components/UploadBackground";
 import ThemeToggle from "./components/ThemeToggle";
 import ManageSocialMedia from "./components/ManageSocialMedia";
+import Projects from "./components/Projects";
+import ManageProjects from "./components/ManageProjects";
+import MemberHierarchy from "./components/MemberHierarchy";
+import Analytics from "./components/Analytics";
 
 import { useEffect } from "react";
 import "./App.css";
 import "./styles/theme.css";
+import "./styles/pages.css";
 
 function App() {
   const location = useLocation();
@@ -158,9 +163,11 @@ function App() {
                 <Route path="/pie-chart" element={<ProtectedRoute><PieChartPage /></ProtectedRoute>} />
                 <Route path="/bar-chart" element={<ProtectedRoute><BarChartPage /></ProtectedRoute>} />
                 <Route path="/line-chart" element={<ProtectedRoute><LineChartPage /></ProtectedRoute>} />
+                <Route path="/charts" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
                 <Route path="/add-secretary" element={<ProtectedRoute><AddSecretary /></ProtectedRoute>} />
                 <Route path="/view-members" element={<ProtectedRoute><ViewMembers /></ProtectedRoute>} />
                 <Route path="/view-mentors" element={<ProtectedRoute><ViewMentors /></ProtectedRoute>} />
+                <Route path="/member-hierarchy" element={<ProtectedRoute><MemberHierarchy /></ProtectedRoute>} />
                 <Route path="/view-all-members" element={<ProtectedRoute><ViewAllMembers /></ProtectedRoute>} />
                 <Route path="/view-events" element={<ProtectedRoute><h2>View Events</h2></ProtectedRoute>} />
                 <Route path="/add-event" element={<ProtectedRoute><h2>Add Event</h2></ProtectedRoute>} />
@@ -183,6 +190,8 @@ function App() {
                 <Route path="/upload-background" element={<ProtectedRoute><UploadBackground /></ProtectedRoute>} />
                 <Route path="/theme-toggle" element={<ProtectedRoute><ThemeToggle /></ProtectedRoute>} />
                 <Route path="/manage-social-media" element={<ProtectedRoute><ManageSocialMedia /></ProtectedRoute>} />
+                <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
+                <Route path="/manage-projects" element={<ProtectedRoute><ManageProjects /></ProtectedRoute>} />
 
                 
 

@@ -94,12 +94,12 @@
 /* Smooth hover transition for menu items */
 .ant-menu-item,
 .ant-menu-submenu-title {
-  transition: background 0.2s ease, transform 0.15s ease !important;
+  transition: background 0.2s ease !important;
 }
 
 .ant-menu-item:hover,
 .ant-menu-submenu-title:hover {
-  transform: translateX(3px);
+  background: #f0f0f0;
 }
 
 /* ===== BUTTON BOUNCE ===== */

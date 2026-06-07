@@ -26,7 +26,17 @@ const Login = () => {
     const bgImg = new Image();
     bgImg.src = `${BG_URL}?t=${Date.now()}`;
     bgImg.onload = () => setBgImage(bgImg.src);
-    bgImg.onerror = () => setBgImage(null); // Use default gradient
+    bgImg.onerror = () => setBgImage(null);
+
+    // Disable scroll on login page
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+
+    return () => {
+      // Re-enable scroll when leaving login
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+    };
   }, []);
 
   const onFinish = async (values) => {
@@ -42,6 +52,12 @@ const Login = () => {
       if (res.status === 200) {
         const { token, member, addressId } = res.data;
         console.log("✅ Full Login Response:", res.data);
+
+        // Check if user account is active
+        if (member.isActive === false || member.active === false) {
+          message.error("Your account has been deactivated. Please contact your administrator.");
+          return;
+        }
 
         localStorage.setItem("token", token);
         axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
@@ -70,15 +86,22 @@ const Login = () => {
 
   const containerStyle = {
     minHeight: "100vh",
+    width: "100%",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
     background: bgImage
       ? `url(${bgImage}) center/cover no-repeat fixed`
       : "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
-    position: "relative",
-    overflow: "hidden",
-    padding: 20,
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    overflow: "auto",
+    padding: "20px 16px",
+    margin: 0,
+    boxSizing: "border-box",
   };
 
   return (
@@ -106,7 +129,6 @@ const Login = () => {
       <div style={styles.glassCard} className="login-glass-card">
         <div style={{ textAlign: "center", marginBottom: 28 }}>
           <img src={logoSrc} alt="VYG Logo" style={styles.logo} />
-          <h2 style={styles.title}>Welcome Back</h2>
           <p style={styles.subtitle}>Sign in to your account</p>
         </div>
 
@@ -166,6 +188,10 @@ const Login = () => {
       </div>
 
       <style>{`
+        html, body {
+          overflow: hidden !important;
+          height: 100% !important;
+        }
         @keyframes float1 {
           0%, 100% { transform: translate(0, 0) scale(1); }
           50% { transform: translate(30px, -30px) scale(1.1); }
@@ -241,8 +267,8 @@ const styles = {
   },
   glassCard: {
     width: "100%",
-    maxWidth: 400,
-    padding: "40px 32px",
+    maxWidth: 380,
+    padding: "30px 28px",
     background: "rgba(255, 255, 255, 0.08)",
     backdropFilter: "blur(20px)",
     WebkitBackdropFilter: "blur(20px)",
@@ -251,6 +277,8 @@ const styles = {
     boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255,255,255,0.1)",
     position: "relative",
     zIndex: 1,
+    maxHeight: "90vh",
+    overflowY: "auto",
   },
   logo: {
     width: 90,
