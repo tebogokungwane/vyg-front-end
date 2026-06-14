@@ -4,10 +4,13 @@
   left: 0;
   height: calc(100vh - 60px);
   width: 250px;
-  background-color: #fff;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-right: 1px solid rgba(255, 255, 255, 0.3);
   transition: transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
   z-index: 1001;
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.06);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -33,6 +36,15 @@
   border-radius: 8px;
   margin: 2px 8px !important;
   transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+
+.sidebar .ant-menu {
+  background: transparent !important;
+}
+
+.sidebar .ant-menu-sub.ant-menu-inline {
+  background: rgba(0, 0, 0, 0.03) !important;
+  border-radius: 8px;
 }
 
 /* Bounce effect on tap/click */

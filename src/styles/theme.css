@@ -114,9 +114,11 @@
    ============================================ */
 
 .dark-theme .sidebar {
-  background: var(--sidebar-bg) !important;
-  border-right: 1px solid var(--border-color) !important;
-  box-shadow: 2px 0 8px var(--shadow) !important;
+  background: rgba(26, 26, 26, 0.75) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.3) !important;
 }
 
 .dark-theme .ant-menu {
