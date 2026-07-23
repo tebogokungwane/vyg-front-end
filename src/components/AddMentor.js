@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Button, Form, Input, Select, message, Alert } from 'antd';
 import axios from "../utils/axios";
 import UserContext from '../context/UserContext';
+import LocationPicker from './LocationPicker';
 
 const { Option } = Select;
 
@@ -14,9 +15,9 @@ const AddMentor = () => {
   const [nations, setNations] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // 🔧 You can change these to control height easily
-  const mobileHeight = "100vh";       // height for mobile
-  const desktopHeight = "90vh";       // height for desktop
+  // Location state
+  const [latitude, setLatitude] = useState(null);
+  const [longitude, setLongitude] = useState(null);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -26,15 +27,27 @@ const AddMentor = () => {
 
   useEffect(() => {
     axios
-      .get( `/api/nations`)
+      .get(`/api/nations`)
       .then((res) => setNations(res.data))
       .catch((err) => {
-        console.error("❌ Error fetching Nations:", err);
+        console.error("Error fetching Nations:", err);
         message.error("Failed to load Nations");
       });
   }, []);
 
+  const handleLocationSelect = (lat, lng, displayAddress) => {
+    setLatitude(lat);
+    setLongitude(lng);
+    form.setFieldsValue({ residentialAddress: displayAddress });
+  };
+
   const onFinish = async (values) => {
+    // Require location for roles that have a residential address
+    if (role !== "PR" && (!latitude || !longitude)) {
+      message.warning("Please search and select the user's address");
+      return;
+    }
+
     setLoading(true);
     try {
       const payload = {
@@ -44,6 +57,8 @@ const AddMentor = () => {
         gender: values.gender.toUpperCase(),
         cellNumber: values.phone,
         residentialAddress: role !== "PR" ? values.residentialAddress : null,
+        latitude: role !== "PR" ? latitude : null,
+        longitude: role !== "PR" ? longitude : null,
         addressId: user?.address?.id,
         role: values.role,
         nation: role === "MENTOR"
@@ -55,22 +70,24 @@ const AddMentor = () => {
         capturedBy: `${user?.name} ${user?.surname}`,
       };
 
-      const response = await axios.post( `/api/member/register`, payload, {
+      const response = await axios.post(`/api/member/register`, payload, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
 
       setAlertInfo({
-        text: `🎉 ${response.data.name} ${response.data.surname} has been successfully registered!`,
+        text: `${response.data.name} ${response.data.surname} has been successfully registered!`,
         type: "success",
       });
 
       form.resetFields();
+      setLatitude(null);
+      setLongitude(null);
     } catch (error) {
-      console.error("❌ Failed to create member:", error);
+      console.error("Failed to create member:", error);
       setAlertInfo({
-        text: "⚠️ Something went wrong! Unable to register the member. Please try again.",
+        text: "Something went wrong! Unable to register the member. Please try again.",
         type: "error",
       });
     } finally {
@@ -86,9 +103,8 @@ const AddMentor = () => {
         justifyContent: "center",
         alignItems: isMobile ? "flex-start" : "center",
         padding: isMobile ? "20px 10px" : "40px",
-        minHeight: isMobile ? mobileHeight : desktopHeight,
+        minHeight: isMobile ? "100vh" : "90vh",
         boxSizing: "border-box",
-        // backgroundColor: "#f5f5f5",
       }}
     >
       <div
@@ -168,15 +184,27 @@ const AddMentor = () => {
             </Form.Item>
           )}
 
+          {/* Address Search with Autocomplete - gets coordinates */}
           {role !== "PR" && (
             <Form.Item
-              name="residentialAddress"
               label="Residential Address"
-              rules={[{ required: true }]}
+              required
+              help="Search the address to capture coordinates"
             >
-              <Input.TextArea rows={3} />
+              <LocationPicker
+                onLocationSelect={handleLocationSelect}
+                placeholder="Search address (e.g. CBC Flats, Soweto, Roodepoort...)"
+              />
             </Form.Item>
           )}
+
+          {/* Hidden field to store the resolved address */}
+          <Form.Item name="residentialAddress" noStyle hidden>
+            <Input />
+          </Form.Item>
+          <Form.Item name="nationName" noStyle hidden>
+            <Input />
+          </Form.Item>
 
           {alertInfo && (
             <Form.Item>

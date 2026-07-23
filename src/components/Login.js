@@ -16,15 +16,15 @@ const Login = () => {
   const [bgImage, setBgImage] = useState(null);
 
   useEffect(() => {
-    // Load logo
+    // Load logo (non-blocking, low priority)
     const img = new Image();
-    img.src = `${process.env.REACT_APP_API_BASE_URL}/api/branding/logo?t=${Date.now()}`;
+    img.src = `${process.env.REACT_APP_API_BASE_URL}/api/branding/logo`;
     img.onload = () => setLogoSrc(img.src);
     img.onerror = () => setLogoSrc(fallbackLogo);
 
-    // Load background image
+    // Load background image (non-blocking, low priority)
     const bgImg = new Image();
-    bgImg.src = `${BG_URL}?t=${Date.now()}`;
+    bgImg.src = BG_URL;
     bgImg.onload = () => setBgImage(bgImg.src);
     bgImg.onerror = () => setBgImage(null);
 
@@ -33,7 +33,6 @@ const Login = () => {
     document.documentElement.style.overflow = "hidden";
 
     return () => {
-      // Re-enable scroll when leaving login
       document.body.style.overflow = "";
       document.documentElement.style.overflow = "";
     };
@@ -50,8 +49,7 @@ const Login = () => {
       });
 
       if (res.status === 200) {
-        const { token, member, addressId } = res.data;
-        console.log("✅ Full Login Response:", res.data);
+        const { token, member, addressId, addressBranch } = res.data;
 
         // Check if user account is active
         if (member.isActive === false || member.active === false) {
@@ -59,19 +57,27 @@ const Login = () => {
           return;
         }
 
+        // Store token immediately for fast subsequent requests
         localStorage.setItem("token", token);
         axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
-        setUser({
+        // Build user object with flat addressBranch (new backend shape)
+        const resolvedAddressId = addressId || member.addressId || member.address?.id;
+        const userData = {
           ...member,
           token,
-          address: { id: addressId || member.address?.id }
-        });
+          addressBranch: addressBranch || member.addressBranch || member.address?.branch || null,
+          address: { id: resolvedAddressId }
+        };
 
+        // Persist to localStorage before navigation for instant reload
+        localStorage.setItem("user", JSON.stringify(userData));
+        setUser(userData);
+
+        // Navigate immediately — don't wait for anything else
         navigate("/dashboard");
       }
     } catch (error) {
-      console.error("❌ Login failed:", error);
       if (error.response?.status === 401) {
         message.error("Invalid email or password");
       } else if (error.response?.status === 403) {
@@ -93,12 +99,12 @@ const Login = () => {
     background: bgImage
       ? `url(${bgImage}) center/cover no-repeat fixed`
       : "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
-    position: "absolute",
+    position: "fixed",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    overflow: "auto",
+    overflow: "hidden",
     padding: "20px 16px",
     margin: 0,
     boxSizing: "border-box",
@@ -188,9 +194,17 @@ const Login = () => {
       </div>
 
       <style>{`
-        html, body {
+        html, body, #root {
           overflow: hidden !important;
           height: 100% !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          width: 100% !important;
+          max-width: 100% !important;
+        }
+        html::-webkit-scrollbar, body::-webkit-scrollbar {
+          display: none !important;
+          width: 0 !important;
         }
         @keyframes float1 {
           0%, 100% { transform: translate(0, 0) scale(1); }

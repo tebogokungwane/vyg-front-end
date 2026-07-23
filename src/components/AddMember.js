@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Button, Form, Input, Select, message, Alert, Spin } from 'antd';
 import axios from "../utils/axios";
 import UserContext from '../context/UserContext';
+import LocationPicker from './LocationPicker';
 
 const { Option } = Select;
 
@@ -12,16 +13,32 @@ const AddMember = () => {
   const [loading, setLoading] = useState(false);
   const { user } = useContext(UserContext);
 
+  // Location state
+  const [latitude, setLatitude] = useState(null);
+  const [longitude, setLongitude] = useState(null);
+
   useEffect(() => {
-    axios.get( `/api/nations`)
+    axios.get(`/api/nations`)
       .then((res) => setNations(res.data))
       .catch((err) => {
-        console.error("❌ Error fetching Nations:", err);
+        console.error("Error fetching Nations:", err);
         message.error("Failed to load Nations");
       });
   }, []);
 
+  const handleLocationSelect = (lat, lng, displayAddress) => {
+    setLatitude(lat);
+    setLongitude(lng);
+    // Auto-fill the residential address with the resolved address
+    form.setFieldsValue({ residentialAddress: displayAddress });
+  };
+
   const onFinish = async (values) => {
+    if (!latitude || !longitude) {
+      message.warning("Please search and select the member's address");
+      return;
+    }
+
     setLoading(true);
     try {
       const payload = {
@@ -31,6 +48,8 @@ const AddMember = () => {
         gender: values.gender.toUpperCase(),
         cellNumber: values.phone,
         residentialAddress: values.residentialAddress,
+        latitude: latitude,
+        longitude: longitude,
         nation: {
           id: values.nationId,
           nation: values.nationName.toUpperCase(),
@@ -43,18 +62,20 @@ const AddMember = () => {
         capturedBy: `${user?.name} ${user?.surname}`,
       };
 
-      const response = await axios.post( `/api/member/register`, payload, {
+      const response = await axios.post(`/api/member/register`, payload, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-      message.success(`🎉 ${response.data.name} ${response.data.surname} registered successfully!`);
+      message.success(`${response.data.name} ${response.data.surname} registered successfully!`);
       setAlertInfo({ type: 'success', text: `${response.data.name} ${response.data.surname} registered successfully!` });
       form.resetFields();
+      setLatitude(null);
+      setLongitude(null);
 
       setTimeout(() => setAlertInfo(null), 5000);
     } catch (error) {
-      console.error("❌ Failed to create member:", error);
+      console.error("Failed to create member:", error);
       setAlertInfo({ type: 'error', text: 'Failed to register member. Please try again.' });
       message.error("Failed to register member.");
     } finally {
@@ -144,8 +165,21 @@ const AddMember = () => {
             </Select>
           </Form.Item>
 
-          <Form.Item name="residentialAddress" label="Residential Address" rules={[{ required: true }]}>
-            <Input.TextArea rows={3} />
+          {/* Location Picker - Address Search */}
+          <Form.Item
+            label="Residential Address"
+            required
+            help="Search the address to capture the member's location"
+          >
+            <LocationPicker
+              onLocationSelect={handleLocationSelect}
+              placeholder="Search address (e.g. CBC Flats, Soweto, Roodepoort...)"
+            />
+          </Form.Item>
+
+          {/* Hidden residential address field (auto-filled by LocationPicker) */}
+          <Form.Item name="residentialAddress" noStyle hidden>
+            <Input />
           </Form.Item>
 
           <Form.Item name="nation" label="Nation" rules={[{ required: true }]}>
@@ -180,18 +214,15 @@ const AddMember = () => {
           )}
 
           <Form.Item>
-            
-
             <Button
               type="primary"
               htmlType="submit"
-              loading={loading} // ✅ Button shows spinner
+              loading={loading}
               style={{ width: "100%" }}
               disabled={loading}
             >
               Submit
             </Button>
-
           </Form.Item>
         </Form>
       </div>

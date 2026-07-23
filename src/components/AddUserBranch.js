@@ -3,6 +3,7 @@ import { Button, Form, Input, Select, message, Spin, Row, Col } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 import axios from '../utils/axios';
 import UserContext from '../context/UserContext';
+import LocationPicker from './LocationPicker';
 import "../styles/AddUserBranch.css";
 
 const { Option } = Select;
@@ -16,34 +17,26 @@ const AddUserBranch = () => {
   const [submitting, setSubmitting] = useState(false);
   const { user } = useContext(UserContext);
 
+  // Location state
+  const [latitude, setLatitude] = useState(null);
+  const [longitude, setLongitude] = useState(null);
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
         const token = localStorage.getItem("token");
-        console.log("🔑 Token found:", token ? "Yes" : "No");
-        console.log("🔑 Token value:", token ? token.substring(0, 20) + "..." : "null");
-
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        console.log("📡 Fetching /api/addresses with headers:", headers);
 
         const [nationsRes, churchesRes] = await Promise.all([
           axios.get(`/api/nations`, { headers }),
           axios.get(`/api/addresses`, { headers })
         ]);
 
-        console.log("✅ Nations response:", nationsRes.data);
-        console.log("✅ Addresses response:", churchesRes.data);
-        console.log("✅ Number of churches loaded:", churchesRes.data?.length);
-
         setNations(nationsRes.data);
         setChurches(churchesRes.data);
       } catch (error) {
-        console.error("❌ Fetch error:", error);
-        console.error("❌ Error status:", error.response?.status);
-        console.error("❌ Error data:", error.response?.data);
-        console.error("❌ Error headers sent:", error.config?.headers);
-
+        console.error("Fetch error:", error);
         if (error.response?.status === 403) {
           message.error("You don't have permission to access this page.");
         } else if (error.response?.status === 401) {
@@ -59,7 +52,19 @@ const AddUserBranch = () => {
     fetchData();
   }, []);
 
+  const handleLocationSelect = (lat, lng, displayAddress) => {
+    setLatitude(lat);
+    setLongitude(lng);
+    form.setFieldsValue({ residentialAddress: displayAddress });
+  };
+
   const onFinish = async (values) => {
+    // Require location for roles that need a residential address
+    if (role !== "PR" && (!latitude || !longitude)) {
+      message.warning("Please search and select the user's address");
+      return;
+    }
+
     setSubmitting(true);
     try {
       const payload = {
@@ -69,6 +74,8 @@ const AddUserBranch = () => {
         gender: values.gender.toUpperCase(),
         cellNumber: values.phone,
         residentialAddress: role !== "PR" ? values.residentialAddress : null,
+        latitude: role !== "PR" ? latitude : null,
+        longitude: role !== "PR" ? longitude : null,
         nation: role !== "PR"
           ? { id: values.nationId, nation: values.nationName?.toUpperCase() }
           : null,
@@ -85,10 +92,12 @@ const AddUserBranch = () => {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-      message.success(`🎉 ${response.data.name} ${response.data.surname} registered successfully!`);
+      message.success(`${response.data.name} ${response.data.surname} registered successfully!`);
       form.resetFields();
+      setLatitude(null);
+      setLongitude(null);
     } catch (error) {
-      console.error("❌ Failed to create member:", error);
+      console.error("Failed to create member:", error);
       message.error(error.response?.data?.message || "Failed to register member. Please try again.");
     } finally {
       setSubmitting(false);
@@ -203,13 +212,23 @@ const AddUserBranch = () => {
           </Col>
         </Row>
 
+        {/* Location Picker - only for roles that need residential address */}
         {role !== "PR" && (
           <Form.Item
-            name="residentialAddress"
             label="Residential Address"
-            rules={[{ required: true, message: 'Please input residential address!' }]}
+            required
+            help="Search the address to capture this user's location"
           >
-            <Input.TextArea rows={3} placeholder="Enter full residential address" />
+            <LocationPicker
+              onLocationSelect={handleLocationSelect}
+              placeholder="Search address (e.g. CBC Flats, Soweto, Roodepoort...)"
+            />
+          </Form.Item>
+        )}
+
+        {role !== "PR" && (
+          <Form.Item name="residentialAddress" noStyle hidden>
+            <Input />
           </Form.Item>
         )}
 

@@ -120,16 +120,6 @@ const Profile = () => {
     setPasswordAlert(null);
 
     try {
-      const verifyResponse = await axios.post(
-        `/api/member/verifyPassword`,
-        { memberId: contextUser.id, password: currentPassword },
-        { headers: { Authorization: `Bearer ${contextUser.token}` } }
-      );
-
-      if (!verifyResponse.data.isValid) {
-        setPasswordAlert({ type: "error", message: "Current password is incorrect." });
-        return;
-      }
       if (newPassword !== confirmPassword) {
         setPasswordAlert({ type: "error", message: "New passwords do not match." });
         return;
@@ -139,24 +129,26 @@ const Profile = () => {
         return;
       }
 
-      const updateResponse = await axios.put(
-        `/api/member/updatePassword/${contextUser.id}`,
-        { newPassword },
+      await axios.put(
+        `/api/member/change-password`,
+        {
+          email: profileData.email,
+          currentPassword,
+          newPassword,
+        },
         { headers: { Authorization: `Bearer ${contextUser.token}` } }
       );
 
-      if (updateResponse.data.success) {
-        setPasswordAlert({ type: "success", message: "Password updated!" });
-        setTimeout(() => {
-          setIsPasswordModalVisible(false);
-          passwordForm.resetFields();
-          setPasswordStrength(0);
-        }, 1500);
-      } else {
-        setPasswordAlert({ type: "error", message: updateResponse.data.message || "Failed." });
-      }
+      setPasswordAlert({ type: "success", message: "Password updated successfully!" });
+      setTimeout(() => {
+        setIsPasswordModalVisible(false);
+        passwordForm.resetFields();
+        setPasswordStrength(0);
+        setPasswordAlert(null);
+      }, 1500);
     } catch (err) {
-      setPasswordAlert({ type: "error", message: err.response?.data?.message || "Failed to update password." });
+      const msg = err.response?.data?.message || err.response?.data || "Failed to update password.";
+      setPasswordAlert({ type: "error", message: msg });
     } finally {
       setIsUpdatingPassword(false);
     }

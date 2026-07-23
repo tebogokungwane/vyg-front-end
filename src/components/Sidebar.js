@@ -19,6 +19,9 @@ import {
   DatabaseOutlined,
   PictureOutlined,
   LogoutOutlined,
+  RadarChartOutlined,
+  BankOutlined,
+  PlusCircleOutlined,
 } from "@ant-design/icons";
 import UserContext from "../context/UserContext";
 import "../styles/Sidebar.css";
@@ -43,7 +46,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, setPageTitle, setPageIcon, user
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const rootSubmenuKeys = ["points", "charts", "member", "settings", "upload-images"];
+  const rootSubmenuKeys = ["points", "charts", "member", "settings", "upload-images", "schools"];
 
   const allMenuItems = [
     { key: "dashboard", icon: <HomeOutlined style={{ color: "#1890ff" }} />, label: "Dashboard" },
@@ -70,9 +73,22 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, setPageTitle, setPageIcon, user
         { key: "view-all-members", icon: <EyeOutlined style={{ color: "#13c2c2" }} />, label: "View All Member" },
         { key: "view-members", icon: <EyeOutlined style={{ color: "#722ed1" }} />, label: "View Members" },
         { key: "member-hierarchy", icon: <TeamOutlined style={{ color: "#fa8c16" }} />, label: "Team Structure" },
+        { key: "nearby-members", icon: <RadarChartOutlined style={{ color: "#52c41a" }} />, label: "Nearby Members" },
       ],
     },
-    { key: "school", icon: <BookOutlined style={{ color: "#fa8c16" }} />, label: "School" },
+    {
+      key: "schools",
+      icon: <BookOutlined style={{ color: "#fa8c16" }} />,
+      label: "Schools",
+      children: [
+        { key: "school", icon: <BookOutlined style={{ color: "#fa8c16" }} />, label: "School Info" },
+        { key: "school-institutions", icon: <BankOutlined style={{ color: "#13c2c2" }} />, label: "All Institutions" },
+        { key: "school-institutions/add", icon: <PlusCircleOutlined style={{ color: "#52c41a" }} />, label: "Add School" },
+        { key: "school-stats", icon: <PieChartOutlined style={{ color: "#722ed1" }} />, label: "School Stats" },
+        { key: "learners", icon: <TeamOutlined style={{ color: "#2f54eb" }} />, label: "Learners" },
+        { key: "learners/add", icon: <PlusCircleOutlined style={{ color: "#52c41a" }} />, label: "Add Learner" },
+      ],
+    },
     { key: "projects", icon: <AppstoreOutlined style={{ color: "#13c2c2" }} />, label: "Projects" },
     { key: "profile", icon: <ProfileOutlined style={{ color: "#597ef7" }} />, label: "Profile" },
     {
